@@ -1,0 +1,13 @@
+@import "tailwindcss";
+@tailwind base;
+@tailwind components;
+@tailwind utilities;
+
+@theme {
+    --font-sans: "Cairo", sans-serif;
+}
+
+button,
+.cursor {
+    cursor: pointer;
+}
