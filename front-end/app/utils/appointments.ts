@@ -7,3 +7,10 @@ export const getAppointmentHour = (date: string) => {
     return `${formatted}:${minutes}`
 }
 export const getAppointmentDate = (date: string) => date.split("T")[0]
+
+export const checkExpired = (date: string) => {
+    const now = new Date()
+    const appointmentDate = new Date(date)
+
+    return appointmentDate < now
+}

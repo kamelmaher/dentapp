@@ -6,8 +6,9 @@ import { AppointmentFilter } from "~/data/AppointmentsFilter";
 import type { Appointment as AppointmentType } from "~/types/Appointment";
 
 export default function Appointments() {
-    const { appointments, loading, setPage, upComingAppointments, todayAppointments } = useAppointmentStore()
+    const { appointments, loading, setPage, upComingAppointments, todayAppointments, expiredAppointments } = useAppointmentStore()
     const [selectedType, setSelectedType] = useState("")
+
     const filteredAppointments = useMemo(() => {
         switch (selectedType) {
             case "today":
@@ -15,11 +16,12 @@ export default function Appointments() {
             case "upcoming":
                 return upComingAppointments
             case "expired":
-                return []
+                return expiredAppointments
             default:
                 return appointments
         }
-    }, [selectedType, appointments, todayAppointments, upComingAppointments])
+    }, [selectedType, appointments, todayAppointments, upComingAppointments, expiredAppointments])
+
     return (
         <div className="space-y-6">
 
@@ -34,7 +36,7 @@ export default function Appointments() {
 
                 <select
                     className="px-4 py-3 bg-white border border-gray-200 rounded-xl shadow-sm hover:shadow-md transition outline-none"
-                    defaultValue="all"
+                    defaultValue=""
                     onChange={(e) => setSelectedType(e.target.value)}
                 >
                     {

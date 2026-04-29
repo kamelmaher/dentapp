@@ -6,7 +6,7 @@ import { useAppointmentStore } from "~/store/appointment.store";
 import { useClinicStore } from "~/store/clinic.store";
 
 export default function Dashboard() {
-    const { getTodayAppointments, getUpcomingAppointments, loadAppointments, page } = useAppointmentStore()
+    const { getTodayAppointments, getUpcomingAppointments, loadAppointments, getExpiredAppointments, page } = useAppointmentStore()
     const { getClinicDetails, selectedClinic, loading: clinicLoading } = useClinicStore()
 
     useEffect(() => {
@@ -16,6 +16,7 @@ export default function Dashboard() {
                     getClinicDetails(),
                     getTodayAppointments(),
                     getUpcomingAppointments(),
+                    getExpiredAppointments(1),
                 ])
             } catch (error) {
                 console.error(error)

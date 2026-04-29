@@ -7,4 +7,5 @@ export const appointment = {
     loadAppointments: (page: number) => get(`/appointment?page=${page || 1}`),
     getTodayAppointments: () => get(`/appointment/today`),
     getUpComingAppointments: () => get(`/appointment/upcoming`),
+    getExpiredAppointments: (page: number) => get(`/appointment/expired?page=${page || 1}`),
 };

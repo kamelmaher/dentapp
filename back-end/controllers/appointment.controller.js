@@ -54,10 +54,35 @@ const getUpcomingAppointments = async (req, res) => {
 
     res.json({ status: statusText.SUCCESS, data: appointments });
 }
+const getExpiredAppointments = async (req, res) => {
+    try {
+        const { clinicId } = req.user;
 
+        const now = new Date().toISOString()
+
+        const appointments = await Appointment.find({
+            clinicId,
+            date: { $lt: now }
+        }).sort({ date: -1 });
+
+        res.status(200).json({
+            status: statusText.SUCCESS,
+            data: appointments
+        });
+
+    } catch (error) {
+        console.error("Get Expired Appointments Error:", error);
+
+        res.status(500).json({
+            status: statusText.FAIL,
+            data: "Something went wrong"
+        });
+    }
+};
 module.exports = {
     createAppointment,
     loadAppointments,
     getTodayAppointments,
-    getUpcomingAppointments
+    getUpcomingAppointments,
+    getExpiredAppointments
 }
