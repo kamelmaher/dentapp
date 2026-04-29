@@ -7,7 +7,7 @@ export const dashboardPages = [
 
 
 export const appointmentStatus = {
-    pending: "قيد الانتظار",
-    accepted: "تم التأكيد",
-    declined: "ملغية",
+    pending: "pending",
+    accepted: "accepted",
+    declined: "declined",
 }

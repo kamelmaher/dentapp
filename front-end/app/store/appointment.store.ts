@@ -1,11 +1,12 @@
 import { create } from "zustand";
 import { appointment } from "~/services/appointment";
-import { user } from "~/services/user";
 import type { Appointment } from "~/types/Appointment";
+
 type appointmentState = {
     appointments: Appointment[]
     createAppointment: (data: Appointment) => Promise<void>
     loading: boolean,
+    optionsLoading: boolean,
     err: string | null
     todayAppointments: Appointment[],
     upComingAppointments: Appointment[],
@@ -16,9 +17,12 @@ type appointmentState = {
     getTodayAppointments: () => Promise<void>
     getUpcomingAppointments: () => Promise<void>
     getExpiredAppointments: (page: number) => Promise<void>
+    confirmAppointment: (id: string) => Promise<void>
+    declineAppointment: (id: string) => Promise<void>
 }
 export const useAppointmentStore = create<appointmentState>((set, get) => ({
     loading: false,
+    optionsLoading: false,
     err: null,
     appointments: [],
     todayAppointments: [],
@@ -76,5 +80,29 @@ export const useAppointmentStore = create<appointmentState>((set, get) => ({
         } finally {
             set({ loading: false })
         }
-    }
+    },
+    confirmAppointment: async (id) => {
+        if (!id) return
+        set({ optionsLoading: true })
+        try {
+            const res = await appointment.confirm(id)
+            if (res.data.status !== "success") set({ err: "Failed to confirm Appointment" })
+        } catch (err) {
+            set({ err: "Something went wrong" })
+        } finally {
+            set({ optionsLoading: false })
+        }
+    },
+    declineAppointment: async (id) => {
+        if (!id) return
+        set({ optionsLoading: true })
+        try {
+            const res = await appointment.decline(id)
+            if (res.data.status !== "success") set({ err: "Failed to decline Appointment" })
+        } catch (err) {
+            set({ err: "Something went wrong" })
+        } finally {
+            set({ optionsLoading: false })
+        }
+    },
 }));

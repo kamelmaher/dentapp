@@ -1,11 +1,13 @@
-import { get, post } from "~/config/api";
+import { get, patch, post } from "~/config/api";
 import type { Appointment } from "~/types/Appointment";
-
+const baseUrl = "/appointment"
 export const appointment = {
-    create: (data: Appointment) => post("/appointment", data),
+    create: (data: Appointment) => post(baseUrl, data),
     // getById: (id: string) => get(`/appointment/${id}`),
-    loadAppointments: (page: number) => get(`/appointment?page=${page || 1}`),
-    getTodayAppointments: () => get(`/appointment/today`),
-    getUpComingAppointments: () => get(`/appointment/upcoming`),
-    getExpiredAppointments: (page: number) => get(`/appointment/expired?page=${page || 1}`),
+    loadAppointments: (page: number) => get(`${baseUrl}?page=${page || 1}`),
+    getTodayAppointments: () => get(`${baseUrl}/today`),
+    getUpComingAppointments: () => get(`${baseUrl}/upcoming`),
+    getExpiredAppointments: (page: number) => get(`${baseUrl}/expired?page=${page || 1}`),
+    confirm: (id: string) => patch(`${baseUrl}/confirm/${id}`),
+    decline: (id: string) => patch(`${baseUrl}/decline/${id}`)
 };

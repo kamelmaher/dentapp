@@ -1,6 +1,7 @@
 const Appointment = require("../models/Appointment")
 const statusText = require("../data/statusText")
 const { MAIN_LIMIT } = require("../data/constants")
+const { ACCEPTED, DECLINED } = require("../data/appointmentStatus")
 
 const createAppointment = async (req, res) => {
     const data = new Appointment(req.body)
@@ -54,6 +55,7 @@ const getUpcomingAppointments = async (req, res) => {
 
     res.json({ status: statusText.SUCCESS, data: appointments });
 }
+
 const getExpiredAppointments = async (req, res) => {
     try {
         const { clinicId } = req.user;
@@ -79,10 +81,37 @@ const getExpiredAppointments = async (req, res) => {
         });
     }
 };
+
+const confirmAppointment = async (req, res) => {
+    const { id } = req.params;
+    if (!id) return res.json({ status: statusText.FAIL, data: "Id is required" })
+    try {
+        const appointment = await Appointment.findOneAndUpdate({ _id: id }, { status: ACCEPTED })
+        if (appointment) return res.json({ status: statusText.SUCCESS, data: appointment })
+        return res.json({ status: statusText.FAIL, data: "Failed Accept Appointment" })
+    } catch (err) {
+        return res.json({ status: statusText.ERROR, data: "Internal Server Error" })
+    }
+}
+
+const declineAppointment = async (req, res) => {
+    const { id } = req.params;
+    if (!id) return res.json({ status: statusText.FAIL, data: "Id is required" })
+    try {
+        const appointment = await Appointment.findOneAndUpdate({ _id: id }, { status: DECLINED })
+        if (appointment) return res.json({ status: statusText.SUCCESS, data: appointment })
+        return res.json({ status: statusText.FAIL, data: "Failed Decline Appointment" })
+    } catch (err) {
+        return res.json({ status: statusText.ERROR, data: "Internal Server Error" })
+    }
+}
+
 module.exports = {
     createAppointment,
     loadAppointments,
     getTodayAppointments,
     getUpcomingAppointments,
-    getExpiredAppointments
+    getExpiredAppointments,
+    confirmAppointment,
+    declineAppointment
 }

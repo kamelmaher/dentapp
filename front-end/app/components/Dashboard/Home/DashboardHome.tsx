@@ -1,7 +1,7 @@
 import { useAuthStore } from "~/store/auth.store"
-import Spinner from "../Spinner"
 import AppointmentsList from "./AppointmentsList"
 import { useAppointmentStore } from "~/store/appointment.store"
+import Spinner from "~/components/Spinner"
 
 export default function DashboardHome() {
     const { todayAppointments, upComingAppointments, loading } = useAppointmentStore()
