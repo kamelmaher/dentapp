@@ -10,7 +10,8 @@ type appointmentState = {
     err: string | null
     todayAppointments: Appointment[],
     upComingAppointments: Appointment[],
-    expiredAppointments: Appointment[]
+    expiredAppointments: Appointment[],
+    searchResults: Appointment[],
     page: number,
     setPage: (page: number) => void,
     loadAppointments: (page: number) => Promise<void>,
@@ -19,6 +20,7 @@ type appointmentState = {
     getExpiredAppointments: (page: number) => Promise<void>
     confirmAppointment: (id: string) => Promise<void>
     declineAppointment: (id: string) => Promise<void>
+    search: (term: string) => Promise<void>
 }
 export const useAppointmentStore = create<appointmentState>((set, get) => ({
     loading: false,
@@ -28,6 +30,7 @@ export const useAppointmentStore = create<appointmentState>((set, get) => ({
     todayAppointments: [],
     upComingAppointments: [],
     expiredAppointments: [],
+    searchResults: [],
     page: 1,
     setPage: (page) => set({ page }),
     createAppointment: async (data) => {
@@ -105,4 +108,15 @@ export const useAppointmentStore = create<appointmentState>((set, get) => ({
             set({ optionsLoading: false })
         }
     },
+    search: async (term) => {
+        set({ loading: true })
+        try {
+            const res = await appointment.search(term)
+            if (res.data.status === "success") set({ searchResults: res.data.data })
+        } catch (err) {
+            set({ err: "Something went wrong" })
+        } finally {
+            set({ loading: false })
+        }
+    }
 }));

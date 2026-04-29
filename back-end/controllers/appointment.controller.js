@@ -106,6 +106,29 @@ const declineAppointment = async (req, res) => {
     }
 }
 
+const searchAppointments = async (req, res) => {
+    const {term} = req.query
+    const { clinicId } = req.user
+    if (!term || term.trim() === "") {
+        return res.status(200).json({
+            status: "success",
+            data: []
+        })
+    }
+    try {
+        const results = await Appointment.find({
+            clinicId: clinicId,
+            patientName: {
+                $regex: term,
+                $options: "i"
+            }
+        }).sort({ date: -1 })
+        res.json({ status: statusText.SUCCESS, data: results })
+    } catch (err) {
+        res.json({ status: statusText.ERROR, data: "Something went wrong" })
+    }
+}
+
 module.exports = {
     createAppointment,
     loadAppointments,
@@ -113,5 +136,6 @@ module.exports = {
     getUpcomingAppointments,
     getExpiredAppointments,
     confirmAppointment,
-    declineAppointment
+    declineAppointment,
+    searchAppointments
 }

@@ -1,6 +1,6 @@
 const router = require("express").Router()
 
-const { createAppointment, loadAppointments, getTodayAppointments, getUpcomingAppointments, getExpiredAppointments, confirmAppointment, declineAppointment } = require("../controllers/appointment.controller")
+const { createAppointment, loadAppointments, getTodayAppointments, getUpcomingAppointments, getExpiredAppointments, confirmAppointment, declineAppointment, searchAppointments } = require("../controllers/appointment.controller")
 
 const validate = require("../middleware/validate.middleware")
 const { appointmentSchema } = require("../validations/appointment.validation")
@@ -16,5 +16,6 @@ router.get("/upcoming", getUpcomingAppointments)
 router.get("/expired", getExpiredAppointments)
 router.patch("/confirm/:id", confirmAppointment)
 router.patch("/decline/:id", declineAppointment)
+router.get("/search", searchAppointments)
 
 module.exports = router

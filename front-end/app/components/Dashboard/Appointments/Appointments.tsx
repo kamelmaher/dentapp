@@ -1,20 +1,37 @@
 import { useAppointmentStore } from "~/store/appointment.store";
 import Spinner from "../../Spinner";
 import Appointment from "./Appointment";
-import { useMemo, useState } from "react";
+import { useEffect, useMemo, useState } from "react";
 import AppointmentsFilter from "./AppointmentsFilter";
 import { appointmentStatus } from "~/data/constants";
 import Pagination from "~/components/Paginiation";
+import { useDebounce } from "~/hooks/useDebounce";
 
 export default function Appointments() {
 
-    const { appointments, loading, setPage, page, upComingAppointments, todayAppointments, expiredAppointments } = useAppointmentStore()
-
+    const { appointments, loading, setPage, page, upComingAppointments, todayAppointments, expiredAppointments, search, searchResults } = useAppointmentStore()
     const [selectedType, setSelectedType] = useState("")
-    const handleChangeType = (type: string) => setSelectedType(type)
+    const [searchTerm, setSearchTerm] = useState("")
+    const debounce = useDebounce(searchTerm, 500)
+    const handleChangeType = (type: string) => {
+        setSelectedType(type)
+        setSearchTerm("")
+    }
     const handlePageChange = (page: number) => setPage(page)
 
+    useEffect(() => {
+        if (debounce.trim()) {
+            console.log("search")
+            search(debounce)
+        }
+    }, [debounce])
+
     const filteredAppointments = useMemo(() => {
+
+        if (debounce.trim()) {
+            return searchResults
+        }
+
         switch (selectedType) {
             case "today":
                 return todayAppointments
@@ -25,7 +42,16 @@ export default function Appointments() {
             default:
                 return appointments
         }
-    }, [selectedType, appointments, todayAppointments, upComingAppointments, expiredAppointments])
+
+    }, [
+        debounce,
+        searchResults,
+        selectedType,
+        appointments,
+        todayAppointments,
+        upComingAppointments,
+        expiredAppointments
+    ])
 
     return (
         <div className="space-y-6">
@@ -37,7 +63,7 @@ export default function Appointments() {
             </div>
 
             {/* Filters */}
-            <AppointmentsFilter handleChangeType={handleChangeType} />
+            <AppointmentsFilter handleChangeType={handleChangeType} handleSearch={setSearchTerm} />
 
             {/* Appointments List */}
             <div className="grid grid-cols-1 md:grid-cols-2 gap-3">
