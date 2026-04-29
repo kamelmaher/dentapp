@@ -3,7 +3,6 @@ const Clinic = require("../models/Clinic")
 const statusText = require("../data/statusText")
 const bcrypt = require("bcryptjs")
 const roles = require("../data/roles")
-const getSlug = require("../utils/geSlug")
 const jwtGenerator = require("../utils/jwtGenerator")
 
 const login = async (req, res) => {
@@ -108,5 +107,5 @@ module.exports = {
     login,
     register,
     logout,
-    me
+    me,
 }

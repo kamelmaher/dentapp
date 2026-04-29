@@ -1,6 +1,10 @@
 import { get } from "../config/api";
 
 export const clinic = {
-    getSingleClinic: (slug: string) => get(`/clinic/${slug}`),
-    getClinics: (page?: number) => get(`/clinic?page=${page || 1}`)
+    // general clinics
+    getClinics: (page?: number) => get(`/clinic?page=${page || 1}`),
+    getClinicBySlug: (slug: string) => get(`/clinic/slug/${slug}`),
+
+    // user clinic
+    getClinicDetails: () => get(`/clinic/dashboard`)
 }

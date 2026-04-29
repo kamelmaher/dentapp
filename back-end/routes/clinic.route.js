@@ -1,9 +1,16 @@
 const express = require("express")
 const router = express.Router()
-const { getSingleClinic, getClinics, updateClinic } = require("../controllers/clinic.controller")
 
-router.get("/:slug", getSingleClinic)
+const { getClinicBySlug, getClinics, updateClinic, getClinicDetails } = require("../controllers/clinic.controller")
+
+const verifyToken = require("../middleware/verifyToken")
+
+// Genereal Clinics
 router.get("/", getClinics)
-router.patch("/:id", updateClinic)
+router.get("/slug/:slug", getClinicBySlug)
+
+// User Clinic
+router.get("/dashboard", verifyToken, getClinicDetails)
+router.patch("/:id", verifyToken, updateClinic)
 
 module.exports = router

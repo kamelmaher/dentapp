@@ -1,21 +1,42 @@
+import { useEffect } from "react";
 import { NavLink, Outlet } from "react-router";
+import Spinner from "~/components/Spinner";
 import { dashboardPages } from "~/data/constants";
-import { useAuthStore } from "~/store/auth.store";
+import { useAppointmentStore } from "~/store/appointment.store";
+import { useClinicStore } from "~/store/clinic.store";
 
 export default function Dashboard() {
-    const { user } = useAuthStore();
+    const { getTodayAppointments, getUpcomingAppointments, loadAppointments, page } = useAppointmentStore()
+    const { getClinicDetails, selectedClinic, loading: clinicLoading } = useClinicStore()
 
+    useEffect(() => {
+        const loadData = async () => {
+            try {
+                await Promise.all([
+                    getClinicDetails(),
+                    getTodayAppointments(),
+                    getUpcomingAppointments(),
+                ])
+            } catch (error) {
+                console.error(error)
+            }
+        }
+        loadData()
+    }, [])
+
+    useEffect(() => {
+        loadAppointments(page)
+    }, [page])
     return (
         <div className="min-h-screen bg-[#f6f9fc] flex" dir="rtl">
 
             {/* Sidebar */}
             <aside className="w-64 bg-white border-l border-gray-100 p-6 hidden md:block shadow-sm">
                 <h1 className="text-2xl font-extrabold text-blue-600 tracking-tight mb-10">
-                    DentApp
+                    {selectedClinic.clinicName}
                 </h1>
 
                 <nav className="space-y-3 text-gray-600 text-sm flex flex-col gap-2">
-
                     {
                         dashboardPages.map(page =>
                             <NavLink
@@ -36,7 +57,14 @@ export default function Dashboard() {
 
             {/* Main */}
             <main className="flex-1 p-8 space-y-8">
-                <Outlet />
+                {
+                    clinicLoading ?
+                        <div className="flex justify-center items-center h-80">
+                            <Spinner size="lg" color="blue-500" />
+                        </div>
+                        :
+                        <Outlet />
+                }
             </main>
         </div >
     );

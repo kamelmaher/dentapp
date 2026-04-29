@@ -2,7 +2,7 @@ const express = require("express")
 const router = express.Router()
 
 // controllers 
-const { login, register, me, logout } = require("../controllers/user.controller")
+const { login, register, me, logout, getClinicDetails, loadAppointments, getTodayAppointments, getUpcomingAppointments } = require("../controllers/user.controller")
 
 // Middlewares
 const validate = require("../middleware/validate.middleware")
@@ -18,4 +18,5 @@ router.post("/register", validate(registerSchema), register)
 router.post("/logout", logout)
 
 router.get("/me", verifyToken, me)
+
 module.exports = router

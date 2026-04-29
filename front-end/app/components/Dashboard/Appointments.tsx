@@ -1,4 +1,25 @@
+import { useAppointmentStore } from "~/store/appointment.store";
+import Spinner from "../Spinner";
+import Appointment from "./Appointment";
+import { useEffect, useMemo, useState } from "react";
+import { AppointmentFilter } from "~/data/AppointmentsFilter";
+import type { Appointment as AppointmentType } from "~/types/Appointment";
+
 export default function Appointments() {
+    const { appointments, loading, setPage, upComingAppointments, todayAppointments } = useAppointmentStore()
+    const [selectedType, setSelectedType] = useState("")
+    const filteredAppointments = useMemo(() => {
+        switch (selectedType) {
+            case "today":
+                return todayAppointments
+            case "upcoming":
+                return upComingAppointments
+            case "expired":
+                return []
+            default:
+                return appointments
+        }
+    }, [selectedType, appointments, todayAppointments, upComingAppointments])
     return (
         <div className="space-y-6">
 
@@ -8,79 +29,45 @@ export default function Appointments() {
                 <p className="text-gray-500">إدارة جميع مواعيد العيادة</p>
             </div>
 
-            {/* Stats */}
-            <div className="grid md:grid-cols-3 gap-6 ">
-
-                <div className="bg-white rounded-2xl p-5 border border-gray-100 shadow-sm hover:shadow-md transition flex justify-between items-center">
-                    <p className="text-gray-500 text-sm">اليوم</p>
-                    <h3 className="text-2xl font-bold text-blue-600">12</h3>
-                </div>
-
-                <div className="bg-white rounded-2xl p-5 border border-gray-100 shadow-sm hover:shadow-md transition flex justify-between items-center">
-                    <p className="text-gray-500 text-sm">القادمة</p>
-                    <h3 className="text-2xl font-bold text-emerald-600">8</h3>
-                </div>
-
-                <div className="bg-white rounded-2xl p-5 border border-gray-100 shadow-sm hover:shadow-md transition flex justify-between items-center">
-                    <p className="text-gray-500 text-sm">ملغاة</p>
-                    <h3 className="text-2xl font-bold text-red-500">2</h3>
-                </div>
-
-            </div>
-
             {/* Filters */}
             <div className="flex flex-wrap gap-3 items-center">
 
-                <button className="px-4 py-2 bg-blue-600 text-white rounded-xl">
-                    اليوم
-                </button>
-
-                <button className="px-4 py-2 bg-gray-100 rounded-xl">
-                    الأسبوع
-                </button>
-
-                <button className="px-4 py-2 bg-gray-100 rounded-xl">
-                    الشهر
-                </button>
+                <select
+                    className="px-4 py-3 bg-white border border-gray-200 rounded-xl shadow-sm hover:shadow-md transition outline-none"
+                    defaultValue="all"
+                    onChange={(e) => setSelectedType(e.target.value)}
+                >
+                    {
+                        AppointmentFilter.map(e =>
+                            <option
+                                key={e.text}
+                                value={e.value}
+                            >
+                                {e.text}
+                            </option>)
+                    }
+                </select>
 
                 <input
                     placeholder="بحث عن مريض..."
-                    className="ml-auto bg-white rounded-2xl p-3 border border-gray-100 shadow-sm hover:shadow-md transition flex justify-between items-center"
+                    className="ml-auto bg-white rounded-2xl p-3 border border-gray-100 shadow-sm hover:shadow-md transition outline-none"
                 />
 
             </div>
 
             {/* Appointments List */}
-            <div className="space-y-4">
+            <div className="space-y-4 grid grid-cols-1 md:grid-cols-2 gap-3">
+                {
+                    loading ?
+                        <Spinner color="blue-500" />
+                        :
+                        filteredAppointments.length > 0 ?
+                            filteredAppointments.map(appointment => {
 
-                <div className="bg-white rounded-2xl p-5 border border-gray-100 shadow-sm hover:shadow-md transition flex justify-between items-center">
+                                return <Appointment key={appointment._id} appointment={appointment} />
+                            }) : <p>لا يوجد مواعيد</p>
 
-                    <div>
-                        <h3 className="font-bold text-gray-900">أحمد علي</h3>
-                        <p className="text-gray-500 text-sm">10:00 AM - ألم أسنان</p>
-                    </div>
-
-                    <div className="flex gap-2 items-center">
-
-                        <span className="text-xs bg-blue-100 text-blue-600 px-3 py-1 rounded-full">
-                            محجوز
-                        </span>
-
-                        <button className="text-sm text-green-600 hover:underline">
-                            تأكيد
-                        </button>
-
-                        <button className="text-sm text-yellow-600 hover:underline">
-                            تعديل
-                        </button>
-
-                        <button className="text-sm text-red-600 hover:underline">
-                            إلغاء
-                        </button>
-
-                    </div>
-
-                </div>
+                }
 
             </div>
 

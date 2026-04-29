@@ -4,3 +4,10 @@ export const dashboardPages = [
     { visible: "المرضى", link: "patients" },
     { visible: "الاعدادات", link: "settings" },
 ]
+
+
+export const appointmentStatus = {
+    pending: "قيد الانتظار",
+    accepted: "تم التأكيد",
+    declined: "ملغية",
+}

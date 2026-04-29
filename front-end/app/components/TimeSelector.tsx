@@ -47,7 +47,7 @@ export default function TimeSelector({ selectDate }: TimeSelectorProps) {
                 {
                     date &&
                     <div className="grid grid-cols-2 sm:grid-cols-3 md:grid-cols-4 gap-3">
-                        {slots.map(e => formatHour(e)).map((slot) => (
+                        {slots.map((slot) => (
                             <button
                                 type="button"
                                 key={slot}
@@ -58,7 +58,7 @@ export default function TimeSelector({ selectDate }: TimeSelectorProps) {
                                         : "bg-white text-gray-700 border-gray-300 hover:border-black hover:text-black"
                                     }`}
                             >
-                                {slot}
+                                {formatHour(slot)}
                             </button>
                         ))}
                     </div>
@@ -77,7 +77,7 @@ export default function TimeSelector({ selectDate }: TimeSelectorProps) {
                     <div className="rounded-xl border border-green-200 bg-green-50 p-4 text-sm text-green-700">
                         تم الحجز في:
                         <span className="font-semibold">
-                            {" "} {date} الساعة {hour}
+                            {" "} {date} الساعة {formatHour(hour)}
                         </span>
                     </div>
                 )

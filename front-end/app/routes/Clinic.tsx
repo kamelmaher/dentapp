@@ -4,34 +4,29 @@ import BookingForm from "~/components/BookForm";
 import ClinicNotFound from "~/components/ClinicNotFound";
 import Spinner from "~/components/Spinner";
 import { clinic } from "~/services/clinic";
+import { useClinicStore } from "~/store/clinic.store";
 import type { Clinic } from "~/types/Clinic";
 
 export default function ClinicPage() {
     const { slug } = useParams()
-    const [loading, setLoading] = useState(true)
-    const [data, setData] = useState<Clinic | null>()
+    const { getClinicBySlug, selectedClinic, loading } = useClinicStore()
     useEffect(() => {
         const loadClinic = async () => {
+            if (!slug) return
             try {
-                const response = await clinic.getSingleClinic(slug || "")
-                if (response.data.status == "success") {
-                    setData(response.data.data)
-                }
+                await getClinicBySlug(slug)
             } catch (err) {
                 console.log(err)
-            } finally {
-                setLoading(false)
             }
         }
-
         loadClinic()
-    }, [])
+    }, [slug])
 
     if (loading) return <div className="h-100 flex justify-center items-center">
-        <Spinner size="lg" color="blue-500"/>
+        <Spinner size="lg" color="blue-500" />
     </div>
 
-    if (!data) return <ClinicNotFound />
+    if (!selectedClinic) return <ClinicNotFound />
 
     return (
         <div className="min-h-screen bg-gray-50" dir="rtl">
@@ -39,7 +34,7 @@ export default function ClinicPage() {
             {/* Hero Section */}
             <div className="bg-gradient-to-l from-blue-600 to-indigo-600 text-white py-16 px-6 text-right">
                 <div className="max-w-5xl mx-auto">
-                    <h1 className="text-4xl font-bold">عيادة {data.clinicName}</h1>
+                    <h1 className="text-4xl font-bold">عيادة {selectedClinic.clinicName}</h1>
 
                     <p className="mt-3 text-lg text-blue-100">
                         رعاية أسنان حديثة باستخدام أحدث التقنيات الطبية وخبرة عالية في العلاج.
@@ -67,7 +62,7 @@ export default function ClinicPage() {
                 <div className="md:col-span-2 bg-white p-6 rounded-2xl shadow-sm text-right">
                     <h2 className="text-xl font-semibold mb-3">عن العيادة</h2>
 
-                    <p className="text-gray-600 leading-relaxed">{data.description}</p>
+                    <p className="text-gray-600 leading-relaxed">{selectedClinic.description}</p>
                 </div>
 
                 {/* Info */}
@@ -75,24 +70,24 @@ export default function ClinicPage() {
                     <h2 className="text-xl font-semibold">معلومات العيادة</h2>
 
                     {
-                        data.address &&
+                        selectedClinic.address &&
                         <div>
                             <p className="text-gray-500 text-sm">العنوان</p>
-                            <p className="font-medium">{data.address}</p>
+                            <p className="font-medium">{selectedClinic.address}</p>
                         </div>
                     }
                     {
-                        data.phoneNumber &&
+                        selectedClinic.phoneNumber &&
                         <div>
                             <p className="text-gray-500 text-sm">رقم الهاتف</p>
-                            <p className="font-medium">{data.phoneNumber}</p>
+                            <p className="font-medium">{selectedClinic.phoneNumber}</p>
                         </div>
                     }
                     {
-                        data.email &&
+                        selectedClinic.email &&
                         <div>
                             <p className="text-gray-500 text-sm">البريد الإلكتروني</p>
-                            <p className="font-medium">{data.email}</p>
+                            <p className="font-medium">{selectedClinic.email}</p>
                         </div>
                     }
 

@@ -14,13 +14,11 @@ const RegisterPage: React.FC = () => {
         description: ""
     });
     const navigate = useNavigate()
-    useEffect(() => {
-        if (isAuthenticated) navigate("/")
-    }, [isAuthenticated])
 
     const handleSubmit = async (e: React.FormEvent) => {
         e.preventDefault();
         await register(formData)
+        if (!err) navigate("/")
     };
 
     return (
