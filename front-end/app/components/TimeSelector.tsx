@@ -1,87 +1,160 @@
 import { useEffect, useState } from "react";
-import { dateFormatter, formatHour } from "~/utils";
 
-type TimeSelectorProps = {
-    selectDate: (date: string) => void
-}
+const DAYS = ["الأحد", "الاثنين", "الثلاثاء", "الأربعاء", "الخميس", "الجمعة", "السبت"];
 
-export default function TimeSelector({ selectDate }: TimeSelectorProps) {
-    const [date, setDate] = useState("")
-    const [hour, setHour] = useState(0)
-    const [slots, setSlots] = useState([11, 12, 13, 14]);
+// 🔥 بيانات من backend لاحقًا
+const WORKING_HOURS = [
+    { day: 0, isOpen: true, start: "10:00", end: "16:00" },
+    { day: 1, isOpen: true, start: "10:00", end: "16:00" },
+    { day: 2, isOpen: true, start: "10:00", end: "16:00" },
+    { day: 3, isOpen: true, start: "10:00", end: "16:00" },
+    { day: 4, isOpen: true, start: "10:00", end: "16:00" },
+    { day: 5, isOpen: false },
+    { day: 6, isOpen: false },
+];
+
+// 🔥 محجوز (من backend لاحقًا)
+const BOOKED = {
+    "2026-04-30": [11, 13],
+};
+
+export default function TimeSelector() {
+    const [date, setDate] = useState("");
+    const [dayIndex, setDayIndex] = useState<number | null>(null);
+    const [slots, setSlots] = useState<number[]>([]);
+    const [selected, setSelected] = useState<number | null>(null);
+
+    const getMinDate = () => {
+        const d = new Date();
+        d.setDate(d.getDate() + 1);
+        return d.toISOString().split("T")[0];
+    };
+
+    const generateSlots = (start: string, end: string) => {
+        const startHour = parseInt(start.split(":")[0]);
+        const endHour = parseInt(end.split(":")[0]);
+
+        let arr = [];
+        for (let i = startHour; i < endHour; i++) {
+            arr.push(i);
+        }
+        return arr;
+    };
+
     useEffect(() => {
-        if (date && hour) selectDate(dateFormatter(date, hour))
-    }, [date, hour])
-    return (
-        <div className="space-y-5 rounded-2xl border border-gray-200 p-5 bg-white shadow-sm" >
+        if (!date) return;
 
-            {/* Date Picker */}
-            <div className="space-y-2">
-                <label className="block text-sm font-medium text-gray-700">
-                    Select Date
+        const day = new Date(date).getDay();
+        setDayIndex(day);
+
+        const workingDay = WORKING_HOURS.find((d) => d.day === day);
+
+        if (!workingDay || !workingDay.isOpen) {
+            setSlots([]);
+            return;
+        }
+
+        const generated = generateSlots(workingDay.start, workingDay.end);
+        setSlots(generated);
+    }, [date]);
+
+    const bookedSlots = BOOKED[date] || [];
+
+    return (
+        <div className="bg-white rounded-2xl p-6 shadow-sm border border-gray-100 space-y-6" dir="rtl">
+
+            <h2 className="text-xl font-bold text-gray-800">
+                احجز موعدك الآن
+            </h2>
+
+            {/* DATE */}
+            <div>
+                <label className="text-sm text-gray-600 mb-1 block">
+                    اختر التاريخ
                 </label>
 
                 <input
                     type="date"
+                    min={getMinDate()}
                     value={date}
-                    min={new Date().toISOString().split("T")[0]}
-                    onChange={e => setDate(e.target.value)}
-                    className="w-full rounded-xl border border-gray-300 px-4 py-3 text-sm outline-none focus:ring-2 focus:ring-black"
+                    onChange={(e) => {
+                        setDate(e.target.value);
+                        setSelected(null);
+                    }}
+                    className="border p-3 rounded-xl w-full focus:outline-none focus:ring-2 focus:ring-blue-200"
                 />
             </div>
 
-            {/* Time Section */}
-            <div className="space-y-3">
-                <label className="block text-sm font-medium text-gray-700">
-                    Available Times
-                </label>
+            {/* DAY STATUS */}
+            {dayIndex !== null && (
+                <p className="text-sm text-gray-500">
+                    اليوم: {DAYS[dayIndex]}
+                </p>
+            )}
 
-                {/* No date */}
-                {!date && (
-                    <div className="rounded-xl border border-dashed border-gray-300 p-4 text-sm text-gray-500">
-                        Please choose a date first
-                    </div>
+            {/* CLOSED DAY */}
+            {dayIndex !== null &&
+                !WORKING_HOURS.find((d) => d.day === dayIndex)?.isOpen && (
+                    <p className="text-red-500 text-sm">
+                        هذا اليوم مغلق
+                    </p>
                 )}
 
+            {/* SLOTS */}
+            {slots.length > 0 && (
+                <div>
+                    <h3 className="font-semibold mb-3">اختر الوقت</h3>
 
-                {
-                    date &&
-                    <div className="grid grid-cols-2 sm:grid-cols-3 md:grid-cols-4 gap-3">
-                        {slots.map((slot) => (
-                            <button
-                                type="button"
-                                key={slot}
-                                onClick={() => setHour(slot)}
-                                className={`rounded-lg px-3 py-2 text-xs font-medium border transition-all duration-200
-                                ${hour === slot
-                                        ? "bg-black text-white border-black scale-105 shadow-sm"
-                                        : "bg-white text-gray-700 border-gray-300 hover:border-black hover:text-black"
-                                    }`}
-                            >
-                                {formatHour(slot)}
-                            </button>
-                        ))}
-                    </div>
-                }
+                    <div className="grid grid-cols-4 gap-2">
 
-                {date && slots.length === 0 && (
-                    <div className="rounded-xl border border-red-200 bg-red-50 p-4 text-sm text-red-600">
-                        No available appointments for this date
-                    </div>
-                )}
-            </div>
+                        {slots.map((hour) => {
+                            const isBooked = bookedSlots.includes(hour);
 
-            {/* Summary */}
-            {
-                date && hour && (
-                    <div className="rounded-xl border border-green-200 bg-green-50 p-4 text-sm text-green-700">
-                        تم الحجز في:
-                        <span className="font-semibold">
-                            {" "} {date} الساعة {formatHour(hour)}
-                        </span>
+                            return (
+                                <button
+                                    key={hour}
+                                    disabled={isBooked}
+                                    onClick={() => setSelected(hour)}
+                                    className={`p-3 rounded-xl border text-sm transition
+                    ${isBooked
+                                            ? "bg-gray-100 text-gray-400 cursor-not-allowed"
+                                            : selected === hour
+                                                ? "bg-blue-600 text-white"
+                                                : "hover:bg-blue-50"
+                                        }
+                  `}
+                                >
+                                    {hour >= 12
+                                        ? `${hour - 12 || 12} PM`
+                                        : `${hour} AM`}
+                                </button>
+                            );
+                        })}
+
                     </div>
-                )
-            }
+                </div>
+            )}
+
+            {/* SELECTED */}
+            {selected !== null && (
+                <div className="bg-blue-50 p-3 rounded-xl text-sm text-blue-700">
+                    تم اختيار الساعة:{" "}
+                    <strong>
+                        {selected >= 12
+                            ? `${selected - 12 || 12} PM`
+                            : `${selected} AM`}
+                    </strong>
+                </div>
+            )}
+
+            {/* SUBMIT */}
+            <button
+                disabled={!date || selected === null}
+                className="w-full bg-blue-600 text-white py-3 rounded-xl hover:bg-blue-700 transition disabled:opacity-50"
+            >
+                تأكيد الحجز
+            </button>
+
         </div>
-    )
+    );
 }

@@ -11,6 +11,6 @@ router.get("/slug/:slug", getClinicBySlug)
 
 // User Clinic
 router.get("/dashboard", verifyToken, getClinicDetails)
-router.patch("/:id", verifyToken, updateClinic)
+router.patch("/update", verifyToken, updateClinic)
 
 module.exports = router

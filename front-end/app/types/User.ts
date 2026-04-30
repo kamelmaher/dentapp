@@ -4,4 +4,5 @@ export type User = {
     email: string;
     role?: string;
     clinicId?: string;
+    phoneNumber: string
 };

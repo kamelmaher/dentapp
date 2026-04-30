@@ -7,13 +7,13 @@ import { useClinicStore } from "~/store/clinic.store";
 
 export default function Dashboard() {
     const { getTodayAppointments, getUpcomingAppointments, loadAppointments, getExpiredAppointments, page } = useAppointmentStore()
-    const { getClinicDetails, selectedClinic, loading: clinicLoading } = useClinicStore()
+    const { getUserClinic, selectedClinic, loading: clinicLoading } = useClinicStore()
 
     useEffect(() => {
         const loadData = async () => {
             try {
                 await Promise.all([
-                    getClinicDetails(),
+                    getUserClinic(),
                     getTodayAppointments(),
                     getUpcomingAppointments(),
                     getExpiredAppointments(1),
@@ -28,6 +28,7 @@ export default function Dashboard() {
     useEffect(() => {
         loadAppointments(page)
     }, [page])
+    
     return (
         <div className="min-h-screen bg-[#f6f9fc] flex" dir="rtl">
 

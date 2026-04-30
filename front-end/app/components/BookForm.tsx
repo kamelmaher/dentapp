@@ -6,11 +6,12 @@ import { useAppointmentStore } from "~/store/appointment.store";
 import { useClinicStore } from "~/store/clinic.store";
 import { appointmentSchema } from "~/data/Schemas";
 import { useFormState } from "react-dom";
+import type { Appointment } from "~/types/Appointment";
 
 export default function BookingForm() {
     const { slug } = useParams()
     const { createAppointment, loading, err, } = useAppointmentStore()
-    const { getSingleClinic, selectedClinic } = useClinicStore()
+    const { getClinicBySlug, selectedClinic } = useClinicStore()
     const [open, setOpen] = useState(false);
     const [formErr, setFormErr] = useState("")
     const [formData, setFormData] = useState({
@@ -20,12 +21,12 @@ export default function BookingForm() {
         date: "",
         patientPhoneNumber: "",
         notes: "",
-    });
+    } as Appointment);
 
     useEffect(() => {
         const loadClinic = async () => {
             if (!slug) return
-            await getSingleClinic(slug)
+            await getClinicBySlug(slug)
         }
         loadClinic()
     }, [slug])
@@ -107,7 +108,7 @@ export default function BookingForm() {
                             />
 
                             {/* Date & Time Selector */}
-                            <TimeSelector selectDate={(date) => selectDate(date)} />
+                            <TimeSelector />
 
 
                             <textarea

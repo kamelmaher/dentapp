@@ -1,6 +1,6 @@
 const plans = require("../data/plans")
 const mongoose = require("mongoose")
-
+const { DEFAULT_CLINIC_WORKING_HOURS } = require("../data/clinic")
 const clinicSchema = new mongoose.Schema({
     clinicId: String,
     userId: String,
@@ -31,6 +31,23 @@ const clinicSchema = new mongoose.Schema({
         type: Date,
         required: true,
         default: () => new Date(Date.now() + 7 * 24 * 60 * 60 * 1000)
+    },
+    workingHours: {
+        type: [
+            {
+                day: {
+                    type: Number,
+                    required: true
+                },
+                isOpen: {
+                    type: Boolean,
+                    default: true
+                },
+                start: String,
+                end: String
+            }
+        ],
+        defaultValue: DEFAULT_CLINIC_WORKING_HOURS
     }
 })
 

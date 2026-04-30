@@ -14,6 +14,7 @@ type AuthState = {
     login: (data: { email: string; password: string }) => Promise<void>;
     logout: () => Promise<void>;
     fetchUser: () => Promise<void>;
+    updateUser: (data: Partial<User>) => Promise<void>
 };
 
 export const useAuthStore = create<AuthState>((set) => ({
@@ -22,7 +23,6 @@ export const useAuthStore = create<AuthState>((set) => ({
     isAuthenticated: false,
     err: null,
 
-    // 🔄 CHECK AUTH (عند فتح التطبيق)
     fetchUser: async () => {
         set({ loading: true });
 
@@ -45,6 +45,7 @@ export const useAuthStore = create<AuthState>((set) => ({
             set({ loading: false })
         }
     },
+
     register: async (data) => {
         set({ loading: true, err: null })
         try {
@@ -67,7 +68,7 @@ export const useAuthStore = create<AuthState>((set) => ({
         }
 
     },
-    // 🔐 LOGIN
+    
     login: async (data) => {
         set({ loading: true, err: null });
         try {
@@ -83,7 +84,6 @@ export const useAuthStore = create<AuthState>((set) => ({
         }
     },
 
-    // 🚪 LOGOUT
     logout: async () => {
         set({ loading: true })
         await auth.logout();
@@ -94,4 +94,18 @@ export const useAuthStore = create<AuthState>((set) => ({
             loading: false
         });
     },
+
+    updateUser: async (data) => {
+        set({ loading: true })
+        try {
+            const res = await auth.updateUser(data)
+            if (res.data.status === "success") {
+                set({ user: res.data.data })
+            }
+        } catch (err) {
+            set({ err: "Something went wrong" })
+        } finally {
+            set({ loading: false })
+        }
+    }
 }));

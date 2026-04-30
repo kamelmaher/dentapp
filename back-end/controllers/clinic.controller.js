@@ -1,6 +1,7 @@
 const Clinic = require("../models/Clinic")
 const statusText = require("../data/statusText");
 const { MAIN_LIMIT } = require("../data/constants");
+const getSlug = require("../utils/geSlug")
 
 const getClinics = async (req, res) => {
     const page = req.query.page || 1
@@ -20,17 +21,31 @@ const getClinicBySlug = async (req, res) => {
 }
 
 const updateClinic = async (req, res) => {
-    const { id } = req.params;
-    if (!id) res.json({ status: statusText.FAIL, data: "Id is required" })
-    res.send(id)
+    const { clinicId } = req.user;
+    if (!clinicId) return res.json({ status: statusText.FAIL, data: "Id is required" })
+    try {
+        let newClinic;
+        const clinicDetails = await Clinic.findOne({ _id: clinicId })
+        if (!clinicDetails) return res.json({ status: statusText.ERROR, data: "Clinic not found" })
+        if (req.body.clinicName) {
+            if (clinicDetails.clinicName === req.body.clinicName) {
+                newClinic = await Clinic.findByIdAndUpdate(clinicId, req.body, { returnDocument: "after" })
+            } else {
+                newClinic = await Clinic.findByIdAndUpdate(clinicId, { ...req.body, slug: getSlug(req.body.clinicName) }, { returnDocument: "after" })
+            }
+        } else newClinic = await Clinic.findByIdAndUpdate(clinicId, req.body, { returnDocument: "after" })
+        res.json({ status: statusText.SUCCESS, data: newClinic })
+    } catch (err) {
+        res.json({ status: statusText.ERROR, data: "Internal Server Error" })
+    }
 }
 
 const getClinicDetails = async (req, res) => {
     const user = req.user;
     if (!user) return res.json({ status: statusText.ERROR, data: "UnAuthorized" })
-    const clinic = await Clinic.find({ userId: user._id })
-    if (clinic.length == 0) return res.json({ status: statusText.FAIL, data: "No Clinics for this user" })
-    res.json({ status: statusText.SUCCESS, data: clinic[0] })
+    const clinic = await Clinic.findOne({ userId: user._id })
+    if (clinic) return res.json({ status: statusText.SUCCESS, data: clinic })
+    res.json({ status: statusText.FAIL, data: "Clinic Not Found" })
 }
 
 module.exports = {

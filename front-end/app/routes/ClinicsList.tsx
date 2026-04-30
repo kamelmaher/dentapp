@@ -4,11 +4,11 @@ import Spinner from "~/components/Spinner";
 import { useClinicStore } from "~/store/clinic.store";
 
 export default function ClinicsPage() {
-    const { clinics, getClinics, loading, err } = useClinicStore()
+    const { clinics, loadClinics, loading, err } = useClinicStore()
     const [page, setPage] = useState(1);
 
     useEffect(() => {
-        getClinics(page)
+        loadClinics(page)
     }, [page])
     return (
         <div className="min-h-screen bg-gray-50 py-12 px-4" dir="rtl">

@@ -7,4 +7,13 @@ export type Clinic = {
     email?: string,
     address?: string
     slug: string
+    logo?: string
+    workingHours?: WorkingHours
 }
+
+export type WorkingHours = {
+    day: number,
+    isOpen: boolean,
+    start: string,
+    end: string
+}[]

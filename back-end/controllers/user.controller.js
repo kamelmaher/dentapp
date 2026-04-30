@@ -103,9 +103,21 @@ const me = async (req, res) => {
     res.json({ status: statusText.SUCCESS, data: userData })
 }
 
+const updateUser = async (req, res) => {
+    const { _id } = req.user
+    if (!_id) return res.josn({ status: statusText.ERROR, data: "Id is required" })
+    try {
+        const user = await User.findByIdAndUpdate(_id, req.body, { returnDocument: "after" })
+        res.json({ status: statusText.SUCCESS, data: user })
+    } catch (err) {
+        res.json({ status: statusText.ERROR, data: "Something went wrong" })
+    }
+}
+
 module.exports = {
     login,
     register,
     logout,
     me,
+    updateUser
 }

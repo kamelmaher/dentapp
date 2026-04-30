@@ -1,10 +1,12 @@
-import { get } from "../config/api";
-
+import type { Clinic } from "~/types/Clinic";
+import { get, patch } from "../config/api";
+const baseUrl = "/clinic"
 export const clinic = {
     // general clinics
-    getClinics: (page?: number) => get(`/clinic?page=${page || 1}`),
-    getClinicBySlug: (slug: string) => get(`/clinic/slug/${slug}`),
+    getClinics: (page?: number) => get(`${baseUrl}?page=${page || 1}`),
+    getClinicBySlug: (slug: string) => get(`${baseUrl}/slug/${slug}`),
 
     // user clinic
-    getClinicDetails: () => get(`/clinic/dashboard`)
+    getUserClinic: () => get(`${baseUrl}/dashboard`),
+    updateClinic: (data: Partial<Clinic>) => patch(`${baseUrl}/update`, data)
 }
