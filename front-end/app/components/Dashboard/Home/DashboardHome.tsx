@@ -2,10 +2,14 @@ import { useAuthStore } from "~/store/auth.store"
 import AppointmentsList from "./AppointmentsList"
 import { useAppointmentStore } from "~/store/appointment.store"
 import Spinner from "~/components/Spinner"
+import { useEffect } from "react"
 
 export default function DashboardHome() {
     const { todayAppointments, upComingAppointments, loading } = useAppointmentStore()
     const { user } = useAuthStore()
+    useEffect(() => {
+        console.log(upComingAppointments)
+    }, [upComingAppointments, loading])
     return <>
         {/* Header */}
         <div>

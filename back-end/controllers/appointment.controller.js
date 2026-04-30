@@ -2,7 +2,7 @@ const Appointment = require("../models/Appointment")
 const statusText = require("../data/statusText")
 const { MAIN_LIMIT } = require("../data/constants")
 const { ACCEPTED, DECLINED } = require("../data/appointmentStatus")
-
+const { formatDate } = require("../utils/index")
 const createAppointment = async (req, res) => {
     const data = new Appointment(req.body)
     await data.save()
@@ -21,29 +21,11 @@ const loadAppointments = async (req, res) => {
 
 const getTodayAppointments = async (req, res) => {
     const user = req.user
-    const today = new Date().toISOString().split("T")[0];
 
-    const appointments = await Appointment.find({
-        clinicId: user.clinicId,
-        date: {
-            $regex: `^${today}`
-        }
-    });
+    const today = formatDate(new Date());
 
-    res.json({ status: statusText.SUCCESS, data: appointments })
-}
-
-const getUpcomingAppointments = async (req, res) => {
-    const user = req.user
-    const tomorrow = new Date();
-    tomorrow.setDate(tomorrow.getDate() + 1);
-    tomorrow.setHours(0, 0, 0, 0)
-
-    const next10Days = new Date();
-    next10Days.setDate(tomorrow.getDate() + 10);
-
-    const start = tomorrow.toISOString().slice(0, 19);
-    const end = next10Days.toISOString().slice(0, 19);
+    const start = `${today}T00:00:00`;
+    const end = `${today}T23:59:59`;
 
     const appointments = await Appointment.find({
         clinicId: user.clinicId,
@@ -53,14 +35,38 @@ const getUpcomingAppointments = async (req, res) => {
         }
     }).sort({ date: 1 });
 
-    res.json({ status: statusText.SUCCESS, data: appointments });
+    res.json({ status: statusText.SUCCESS, data: appointments })
 }
+
+const getUpcomingAppointments = async (req, res) => {
+    const user = req.user;
+
+    const tomorrow = new Date();
+    tomorrow.setDate(tomorrow.getDate() + 1);
+    tomorrow.setHours(0, 0, 0, 0);
+
+    const next10Days = new Date();
+    next10Days.setDate(next10Days.getDate() + 10);
+    next10Days.setHours(23, 59, 59, 0);
+
+
+
+    const start = formatDate(tomorrow);
+    const end = formatDate(next10Days);
+
+    const appointments = await Appointment.find({
+        clinicId: user.clinicId,
+        date: { $gte: start, $lte: end }
+    }).sort({ date: 1 });
+
+    res.json({ status: "success", data: appointments });
+};
 
 const getExpiredAppointments = async (req, res) => {
     try {
         const { clinicId } = req.user;
 
-        const now = new Date().toISOString()
+        const now = formatDate(new Date())
 
         const appointments = await Appointment.find({
             clinicId,

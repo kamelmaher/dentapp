@@ -4,7 +4,6 @@ import type { Appointment } from "~/types/Appointment";
 
 type appointmentState = {
     appointments: Appointment[]
-    createAppointment: (data: Appointment) => Promise<void>
     loading: boolean,
     optionsLoading: boolean,
     err: string | null
@@ -14,6 +13,7 @@ type appointmentState = {
     searchResults: Appointment[],
     page: number,
     setPage: (page: number) => void,
+    createAppointment: (data: Appointment) => Promise<void>
     loadAppointments: (page: number) => Promise<void>,
     getTodayAppointments: () => Promise<void>
     getUpcomingAppointments: () => Promise<void>
@@ -67,10 +67,17 @@ export const useAppointmentStore = create<appointmentState>((set, get) => ({
         else set({ err: res.data.data })
     },
     getUpcomingAppointments: async () => {
-        const res = await appointment.getUpComingAppointments()
-        if (res.data.status === "success")
-            set({ upComingAppointments: res.data.data })
-        else set({ err: res.data.data })
+        set({ loading: true })
+        try {
+            const res = await appointment.getUpComingAppointments()
+            if (res.data.status === "success")
+                set({ upComingAppointments: res.data.data })
+            else set({ err: res.data.data })
+        } catch (err) {
+            set({ err: "Something Went Wrong" })
+        } finally {
+            set({ loading: false })
+        }
     },
     getExpiredAppointments: async (page) => {
         try {

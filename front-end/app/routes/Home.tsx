@@ -31,7 +31,7 @@ const HomePage = () => {
         <div className="mt-16 relative mx-auto max-w-5xl">
           <div className="bg-gray-800 rounded-2xl p-2 shadow-2xl overflow-hidden border-4 border-gray-200">
             <div className="bg-white rounded-xl aspect-video flex items-center justify-center text-gray-400">
-              [صورة تعبيرية لواجهة لوحة التحكم]
+              <img src="/hero.png" alt="" />
             </div>
           </div>
         </div>
