@@ -1,28 +1,19 @@
 import { useEffect, useState } from "react";
+import { useAppointmentStore } from "~/store/appointment.store";
+import type { WorkingHours } from "~/types/Clinic";
 
-const DAYS = ["الأحد", "الاثنين", "الثلاثاء", "الأربعاء", "الخميس", "الجمعة", "السبت"];
-
-// 🔥 بيانات من backend لاحقًا
-const WORKING_HOURS = [
-    { day: 0, isOpen: true, start: "10:00", end: "16:00" },
-    { day: 1, isOpen: true, start: "10:00", end: "16:00" },
-    { day: 2, isOpen: true, start: "10:00", end: "16:00" },
-    { day: 3, isOpen: true, start: "10:00", end: "16:00" },
-    { day: 4, isOpen: true, start: "10:00", end: "16:00" },
-    { day: 5, isOpen: false },
-    { day: 6, isOpen: false },
-];
-
-// 🔥 محجوز (من backend لاحقًا)
-const BOOKED = {
-    "2026-04-30": [11, 13],
+type Props = {
+    workingHours: WorkingHours;
+    // booked: Record<string, number[]>;
+    onSelect: (dateTime: string) => void;
 };
 
-export default function TimeSelector() {
+export default function TimeSelector({ workingHours, onSelect }: Props) {
     const [date, setDate] = useState("");
-    const [dayIndex, setDayIndex] = useState<number | null>(null);
     const [slots, setSlots] = useState<number[]>([]);
     const [selected, setSelected] = useState<number | null>(null);
+    const [bookedSlots, setBooked] = useState<number[]>([])
+    const { getBooked } = useAppointmentStore()
 
     const getMinDate = () => {
         const d = new Date();
@@ -31,130 +22,99 @@ export default function TimeSelector() {
     };
 
     const generateSlots = (start: string, end: string) => {
-        const startHour = parseInt(start.split(":")[0]);
-        const endHour = parseInt(end.split(":")[0]);
+        const startH = parseInt(start.split(":")[0]);
+        const endH = parseInt(end.split(":")[0]);
 
         let arr = [];
-        for (let i = startHour; i < endHour; i++) {
-            arr.push(i);
-        }
+        for (let i = startH; i < endH; i++) arr.push(i);
         return arr;
     };
+
+    // fetch booked hours 
+    useEffect(() => {
+        const fetchBooked = async () => {
+            const bookedData = await getBooked(date)
+            setBooked(bookedData)
+        }
+        fetchBooked()
+    }, [date])
 
     useEffect(() => {
         if (!date) return;
 
         const day = new Date(date).getDay();
-        setDayIndex(day);
-
-        const workingDay = WORKING_HOURS.find((d) => d.day === day);
+        const workingDay = workingHours.find((d) => d.day === day);
 
         if (!workingDay || !workingDay.isOpen) {
             setSlots([]);
             return;
         }
 
-        const generated = generateSlots(workingDay.start, workingDay.end);
-        setSlots(generated);
-    }, [date]);
+        setSlots(generateSlots(workingDay.start, workingDay.end));
+        setSelected(null);
+    }, [date, workingHours]);
 
-    const bookedSlots = BOOKED[date] || [];
+    useEffect(() => {
+        if (!date || selected === null) return;
+
+        const hour = selected.toString().padStart(2, "0");
+        const dateTime = `${date}T${hour}:00:00`;
+
+        onSelect(dateTime);
+    }, [selected]);
 
     return (
-        <div className="bg-white rounded-2xl p-6 shadow-sm border border-gray-100 space-y-6" dir="rtl">
-
-            <h2 className="text-xl font-bold text-gray-800">
-                احجز موعدك الآن
-            </h2>
+        <div className="space-y-4">
 
             {/* DATE */}
             <div>
-                <label className="text-sm text-gray-600 mb-1 block">
-                    اختر التاريخ
-                </label>
-
+                <label className="text-sm text-gray-600 block mb-1">التاريخ</label>
                 <input
                     type="date"
                     min={getMinDate()}
                     value={date}
-                    onChange={(e) => {
-                        setDate(e.target.value);
-                        setSelected(null);
-                    }}
-                    className="border p-3 rounded-xl w-full focus:outline-none focus:ring-2 focus:ring-blue-200"
+                    onChange={(e) => setDate(e.target.value)}
+                    className="w-full border p-3 rounded-xl focus:ring-2 focus:ring-blue-200"
                 />
             </div>
-
-            {/* DAY STATUS */}
-            {dayIndex !== null && (
-                <p className="text-sm text-gray-500">
-                    اليوم: {DAYS[dayIndex]}
-                </p>
-            )}
-
-            {/* CLOSED DAY */}
-            {dayIndex !== null &&
-                !WORKING_HOURS.find((d) => d.day === dayIndex)?.isOpen && (
-                    <p className="text-red-500 text-sm">
-                        هذا اليوم مغلق
-                    </p>
-                )}
 
             {/* SLOTS */}
             {slots.length > 0 && (
                 <div>
-                    <h3 className="font-semibold mb-3">اختر الوقت</h3>
+                    <p className="text-sm text-gray-600 mb-2">اختر الوقت</p>
 
                     <div className="grid grid-cols-4 gap-2">
-
-                        {slots.map((hour) => {
-                            const isBooked = bookedSlots.includes(hour);
-
+                        {slots.map((h) => {
+                            const isBooked = bookedSlots.includes(h);
                             return (
                                 <button
-                                    key={hour}
+                                    type="button"
                                     disabled={isBooked}
-                                    onClick={() => setSelected(hour)}
-                                    className={`p-3 rounded-xl border text-sm transition
-                    ${isBooked
-                                            ? "bg-gray-100 text-gray-400 cursor-not-allowed"
-                                            : selected === hour
+                                    key={h}
+                                    onClick={() => setSelected(h)}
+                                    className={`p-3 rounded-xl text-sm border transition
+                                    ${isBooked ? "bg-gray-100 text-gray-400 cursor-not-allowed"
+                                            : selected === h
                                                 ? "bg-blue-600 text-white"
-                                                : "hover:bg-blue-50"
-                                        }
-                  `}
+                                                : "hover:bg-blue-50"}`}
                                 >
-                                    {hour >= 12
-                                        ? `${hour - 12 || 12} PM`
-                                        : `${hour} AM`}
+                                    {h >= 12 ? `${h - 12 || 12} PM` : `${h} AM`}
                                 </button>
-                            );
+                            )
                         })}
-
                     </div>
                 </div>
-            )}
+            )
+            }
 
-            {/* SELECTED */}
-            {selected !== null && (
-                <div className="bg-blue-50 p-3 rounded-xl text-sm text-blue-700">
-                    تم اختيار الساعة:{" "}
-                    <strong>
-                        {selected >= 12
-                            ? `${selected - 12 || 12} PM`
-                            : `${selected} AM`}
-                    </strong>
-                </div>
-            )}
+            {
+                slots.length === 0 && date && (
+                    <p className="text-red-500 text-sm">
+                        لا يوجد مواعيد متاحة في هذا اليوم
+                    </p>
+                )
+            }
 
-            {/* SUBMIT */}
-            <button
-                disabled={!date || selected === null}
-                className="w-full bg-blue-600 text-white py-3 rounded-xl hover:bg-blue-700 transition disabled:opacity-50"
-            >
-                تأكيد الحجز
-            </button>
-
-        </div>
+        </div >
     );
 }

@@ -107,7 +107,7 @@ const declineAppointment = async (req, res) => {
 }
 
 const searchAppointments = async (req, res) => {
-    const {term} = req.query
+    const { term } = req.query
     const { clinicId } = req.user
     if (!term || term.trim() === "") {
         return res.status(200).json({
@@ -129,6 +129,31 @@ const searchAppointments = async (req, res) => {
     }
 }
 
+const getBooked = async (req, res) => {
+    const { date } = req.query
+    const { clinicId } = req.user
+
+    const start = `${date}T00:00:00`;
+    const end = `${date}T23:59:59`;
+
+    try {
+        const appointments = await Appointment.find({
+            clinicId,
+            date: { $gte: start, $lte: end },
+        });
+        const hours = appointments.map((a) => {
+            return new Date(a.date).getHours();
+        });
+
+        res.json({
+            status: statusText.SUCCESS,
+            data: hours,
+        });
+    } catch (err) {
+        res.json({ status: statusText.ERROR, data: "Something went wrong" })
+    }
+}
+
 module.exports = {
     createAppointment,
     loadAppointments,
@@ -137,5 +162,6 @@ module.exports = {
     getExpiredAppointments,
     confirmAppointment,
     declineAppointment,
-    searchAppointments
+    searchAppointments,
+    getBooked
 }

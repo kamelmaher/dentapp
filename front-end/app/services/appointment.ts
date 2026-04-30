@@ -10,5 +10,6 @@ export const appointment = {
     getExpiredAppointments: (page: number) => get(`${baseUrl}/expired?page=${page || 1}`),
     confirm: (id: string) => patch(`${baseUrl}/confirm/${id}`),
     decline: (id: string) => patch(`${baseUrl}/decline/${id}`),
-    search: (term: string) => get(`${baseUrl}/search?term=${term}`)
+    search: (term: string) => get(`${baseUrl}/search?term=${term}`),
+    getBooked: (date: string) => get(`${baseUrl}/booked?date=${date}`)
 };

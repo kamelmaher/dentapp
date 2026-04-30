@@ -108,7 +108,7 @@ export default function BookingForm() {
                             />
 
                             {/* Date & Time Selector */}
-                            <TimeSelector />
+                            <TimeSelector onSelect={selectDate} workingHours={selectedClinic.workingHours!} />
 
 
                             <textarea
