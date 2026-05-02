@@ -14,6 +14,7 @@ type clinicState = {
     loadClinics: (page?: number) => Promise<void>
     getClinicBySlug: (slug: string) => Promise<void>
     getUserClinic: () => Promise<void>
+    updateClinic: (data: Partial<Clinic>) => Promise<void>
 }
 export const useClinicStore = create<clinicState>((set, get) => ({
     loading: false,
@@ -68,4 +69,16 @@ export const useClinicStore = create<clinicState>((set, get) => ({
             set({ loading: false })
         }
     },
+    updateClinic: async (data) => {
+        set({ updateLoading: true })
+        try {
+            const res = await clinic.updateClinic(data)
+            if (res.data.status === "success") set({ selectedClinic: res.data.data })
+            else set({ err: "updating failed" })
+        } catch (err) {
+            set({ err: "Something went wrong" })
+        } finally {
+            set({ updateLoading: false })
+        }
+    }
 }))

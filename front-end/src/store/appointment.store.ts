@@ -23,7 +23,6 @@ type appointmentState = {
     declineAppointment: (id: string) => Promise<void>
     search: (term: string) => Promise<void>
     getBooked: (date: string) => Promise<number[]>,
-    updateAppointment: (data: Partial<Appointment>) => Promise<void>
 }
 export const useAppointmentStore = create<appointmentState>((set, get) => ({
     loading: false,
@@ -154,23 +153,5 @@ export const useAppointmentStore = create<appointmentState>((set, get) => ({
         if (res.data.status === "success")
             return res.data.data
         else return []
-    },
-    updateAppointment: async (data) => {
-        try {
-            const res = await appointment.updateAppointment(data)
-            if (res.data.status == "success") {
-                set((state) => ({
-                    appointments: state.appointments.map((appt) =>
-                        appt._id === data._id
-                            ? { ...appt, ...data }
-                            : appt
-                    ),
-                }));
-            }
-        } catch (err) {
-            set({ err: "Error" })
-        } finally {
-            set({ loading: false })
-        }
     }
 }));

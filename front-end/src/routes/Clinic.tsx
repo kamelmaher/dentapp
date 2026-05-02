@@ -18,9 +18,7 @@ export default function ClinicPage() {
     return (
         <div className="min-h-screen bg-gray-50" dir="rtl">
             {clinicLoading ? (
-                <div className="flex justify-center h-80 items-center">
-                    <Spinner color="blue-500" size="lg" />
-                </div>
+                <Spinner />
             ) : (
                 <>
                     {/* Hero Section */}

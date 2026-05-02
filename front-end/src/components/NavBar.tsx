@@ -17,11 +17,9 @@ const NavBar = () => {
                 <NavLink to="/clinics" className="text-gray-600 hover:text-blue-600 transition">قسم العيادات</NavLink>
                 <NavLink to="#pricing" className="text-gray-600 hover:text-blue-600 transition">الأسعار</NavLink>
                 {
-                    loading ? <div
-                        className="w-30 text-center"
-                    >
-                        <Spinner size="md" color="blue-600" />
-                    </div> :
+                    loading ?
+                        <Spinner />
+                        :
                         isAuthenticated ? <>
                             <NavLink to={"/dashboard"} className="mx-2 bg-blue-600 text-white px-6 py-2 rounded-lg hover:bg-blue-700 transition">لوحة التحكم</NavLink>
                             <button
