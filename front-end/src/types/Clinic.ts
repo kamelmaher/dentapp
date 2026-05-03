@@ -1,3 +1,5 @@
+import { plans } from "../data/constants"
+
 export type Clinic = {
     _id: string,
     userId: string,
@@ -11,8 +13,8 @@ export type Clinic = {
     createdAt: string
     validTo: string
     workingHours?: WorkingHours
+    plan: typeof plans[keyof typeof plans]
 }
-
 export type WorkingHours = {
     day: number,
     isOpen: boolean,

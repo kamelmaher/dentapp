@@ -8,5 +8,6 @@ export const clinic = {
 
     // user clinic
     getUserClinic: () => get(`${baseUrl}/dashboard`),
-    updateClinic: (data: Partial<Clinic>) => patch(`${baseUrl}/update`, data)
+    updateClinic: (data: Partial<Clinic>) => patch(`${baseUrl}/update`, data),
+    subscribe: (clinicId: string, plan: string) => patch(`${baseUrl}/subscribe`, { clinicId, plan })
 }

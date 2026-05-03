@@ -1,6 +1,7 @@
 const Clinic = require("../models/Clinic")
 const statusText = require("../data/statusText");
 const { MAIN_LIMIT } = require("../data/constants");
+const plans = require("../data/plans");
 const getSlug = require("../utils/geSlug")
 
 const getClinics = async (req, res) => {
@@ -24,17 +25,25 @@ const getClinicBySlug = async (req, res) => {
 const updateClinic = async (req, res) => {
     const { clinicId } = req.user;
     if (!clinicId) return res.json({ status: statusText.FAIL, data: "Id is required" })
+    const allowedFields = ["clinicName", "email", "phoneNumber", "description", "logo", "address", "workingHours"];
+    const updateData = {};
+
+    allowedFields.forEach((field) => {
+        if (req.body[field] !== undefined) {
+            updateData[field] = req.body[field];
+        }
+    });
     try {
         let newClinic;
         const clinicDetails = await Clinic.findOne({ _id: clinicId })
         if (!clinicDetails) return res.json({ status: statusText.ERROR, data: "Clinic not found" })
-        if (req.body.clinicName) {
-            if (clinicDetails.clinicName === req.body.clinicName) {
-                newClinic = await Clinic.findByIdAndUpdate(clinicId, req.body, { returnDocument: "after" })
+        if (updateData.clinicName) {
+            if (clinicDetails.clinicName === updateData.clinicName) {
+                newClinic = await Clinic.findByIdAndUpdate(clinicId, updateData, { returnDocument: "after" })
             } else {
-                newClinic = await Clinic.findByIdAndUpdate(clinicId, { ...req.body, slug: getSlug(req.body.clinicName) }, { returnDocument: "after" })
+                newClinic = await Clinic.findByIdAndUpdate(clinicId, { ...updateData, slug: getSlug(req.body.clinicName) }, { returnDocument: "after" })
             }
-        } else newClinic = await Clinic.findByIdAndUpdate(clinicId, req.body, { returnDocument: "after" })
+        } else newClinic = await Clinic.findByIdAndUpdate(clinicId, updateData, { returnDocument: "after" })
         res.json({ status: statusText.SUCCESS, data: newClinic })
     } catch (err) {
         res.json({ status: statusText.ERROR, data: "Internal Server Error" })
@@ -49,9 +58,43 @@ const getClinicDetails = async (req, res) => {
     res.json({ status: statusText.FAIL, data: "Clinic Not Found" })
 }
 
+const subscribe = async (req, res) => {
+    const { clinicId } = req.body;
+    if (!clinicId) return res.json({ status: statusText.ERROR, data: "User Not Found" })
+    const { plan } = req.body
+    if (!plan) return res.json({ status: statusText.FAIL, data: "not a Valid Plan" })
+    let newPlan
+    switch (plan) {
+        case plans.MONTHLY: newPlan = plans.MONTHLY
+            break;
+        case plans.ANNUAL: newPlan = plans.ANNUAL
+            break
+        default: return res.json({ status: statusText.FAIL, data: "not a Valid Plan" })
+    }
+    try {
+
+        const updated = await Clinic.findByIdAndUpdate(
+            clinicId,
+            {
+                plan: newPlan,
+                validTo:
+                    newPlan === plans.MONTHLY
+                        ? new Date(Date.now() + 30 * 24 * 60 * 60 * 1000)
+                        : new Date(Date.now() + 365 * 24 * 60 * 60 * 1000),
+            },
+            { returnDocument: "after" }
+        );
+        res.json({ status: statusText.SUCCESS, data: updated })
+    } catch (err) {
+        res.json({ status: statusText.ERROR, data: "Internal Server Error" })
+    }
+
+}
+
 module.exports = {
     getClinicBySlug,
     getClinics,
     updateClinic,
-    getClinicDetails
+    getClinicDetails,
+    subscribe
 }

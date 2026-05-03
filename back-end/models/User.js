@@ -1,4 +1,5 @@
 const roles = require("../data/roles")
+const plans = require("../data/plans")
 const mongoose = require("mongoose")
 
 const userSchema = new mongoose.Schema({
@@ -12,10 +13,7 @@ const userSchema = new mongoose.Schema({
         type: String,
         enum: [roles.ADMIN, roles.MANAGER]
     },
-    isActive: {
-        type: Boolean,
-        default: true
-    }
+   
 })
 
 const User = mongoose.model("User", userSchema)

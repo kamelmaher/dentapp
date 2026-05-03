@@ -10,7 +10,7 @@ export default function Pagination({
     onPageChange,
 }: PaginationProps) {
     const pages = Array.from({ length: totalPages }, (_, i) => i + 1)
-
+    if (totalPages == 0) return
     return (
         <div className="flex items-center justify-center gap-2 mt-6">
 

@@ -17,9 +17,10 @@ const clinicSchema = new mongoose.Schema({
     description: String,
     email: String,
     address: String,
+
     plan: {
         type: String,
-        enum: [plans.FREE, plans.MONTHLY, plans.UNLIMITED],
+        enum: [plans.MONTHLY, plans.ANNUAL, plans.FREE],
         default: plans.FREE
     },
     createdAt: {

@@ -1,9 +1,9 @@
 const FREE = "free"
 const MONTHLY = "monthly"
-const UNLIMITED = "unlimited"
+const ANNUAL = "annual"
 
 module.exports = {
     FREE,
     MONTHLY,
-    UNLIMITED
+    ANNUAL
 }

@@ -14,9 +14,8 @@ export default function Dashboard() {
         if (!clinicLoading)
             if (err)
                 navigate("/")
+    }, [navigate, clinicLoading, err])
 
-    }, [navigate, selectedClinic, clinicLoading, err])
-    
     useEffect(() => {
         const loadData = async () => {
             try {

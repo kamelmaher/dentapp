@@ -1,3 +1,4 @@
+
 export const dashboardPages = [
     { visible: "الصفحة الرئيسية", link: "" },
     { visible: "المواعيد", link: "appointments" },
@@ -11,3 +12,10 @@ export const appointmentStatus = {
     accepted: "accepted",
     declined: "declined",
 }
+
+export const plans = {
+    MONTHLY: "monthly",
+    ANNUAL: "annual",
+    FREE: "free"
+}
+

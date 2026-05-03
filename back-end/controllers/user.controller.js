@@ -5,7 +5,7 @@ const bcrypt = require("bcryptjs")
 const roles = require("../data/roles")
 const jwtGenerator = require("../utils/jwtGenerator")
 const getSlug = require("../utils/geSlug")
-
+const { MAIN_LIMIT } = require("../data/constants")
 const login = async (req, res) => {
     const { email, password } = req.body
     // Check Empty Feilds
@@ -101,20 +101,30 @@ const me = async (req, res) => {
     res.json({ status: statusText.SUCCESS, data: userData })
 }
 
+const getAllUsers = async (req, res) => {
+    const page = req.query.page || 1
+    const skip = MAIN_LIMIT * (+page - 1)
+    const users = await User.find().limit(MAIN_LIMIT).skip(skip)
+    res.json({ status: statusText.SUCCESS, data: users })
+}
+
 const updateUser = async (req, res) => {
     const { _id } = req.user
     if (!_id) return res.josn({ status: statusText.ERROR, data: "Id is required" })
     try {
-        const user = await User.findByIdAndUpdate(_id, req.body, { returnDocument: "after" })
+        const allowedFields = ["userName", "email", "phoneNumber", "password"];
+        const updateData = {};
+
+        allowedFields.forEach((field) => {
+            if (req.body[field] !== undefined) {
+                updateData[field] = req.body[field];
+            }
+        });
+        const user = await User.findByIdAndUpdate(_id, updateData, { returnDocument: "after" })
         res.json({ status: statusText.SUCCESS, data: user })
     } catch (err) {
         res.json({ status: statusText.ERROR, data: "Something went wrong" })
     }
-}
-
-const subscribe = async (req, res) => {
-    const user = req.user
-    const updated = await User.findByIdAndUpdate(user._id, { isActive: true })
 }
 
 module.exports = {
@@ -122,5 +132,6 @@ module.exports = {
     register,
     logout,
     me,
-    updateUser
+    updateUser,
+    getAllUsers
 }

@@ -1,6 +1,7 @@
 import { create } from "zustand/react";
 import { clinic } from "../services/clinic";
 import type { Clinic } from "../types/Clinic";
+import { auth } from "../services/auth";
 type clinicState = {
     loading: boolean,
     page: number,
@@ -15,6 +16,7 @@ type clinicState = {
     getClinicBySlug: (slug: string) => Promise<void>
     getUserClinic: () => Promise<void>
     updateClinic: (data: Partial<Clinic>) => Promise<void>
+    subscribe: (clinicId: string, plan: string) => Promise<void>
 }
 export const useClinicStore = create<clinicState>((set, get) => ({
     loading: false,
@@ -80,5 +82,22 @@ export const useClinicStore = create<clinicState>((set, get) => ({
         } finally {
             set({ updateLoading: false })
         }
+    },
+    subscribe: async (clinicId, plan) => {
+        try {
+            const res = await clinic.subscribe(clinicId, plan)
+            if (res.data.status === "success") {
+                set((state) => ({
+                    clinics: state.clinics.map((clinic) =>
+                        clinic._id === clinicId
+                            ? { ...clinic, plan, validTo: res.data.data.validTo }
+                            : clinic
+                    ),
+                }))
+            }
+        } catch (err) {
+            set({ err: "Something went wrong" })
+        }
+
     }
 }))

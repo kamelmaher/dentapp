@@ -8,5 +8,6 @@ export const auth = {
     login: (data: { email: string, password: string }) => post(`${baseUrl}/login`, data),
     me: () => get(`${baseUrl}/me`),
     logout: () => post(`${baseUrl}/logout`),
-    updateUser: (data: Partial<User>) => patch(`${baseUrl}`, data)
+    updateUser: (data: Partial<User>) => patch(`${baseUrl}`, data),
+    getUsers: (page: number) => get(`${baseUrl}?page=${page || 1}`)
 };

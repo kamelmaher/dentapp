@@ -4,7 +4,7 @@ import Spinner from './Spinner'
 import { useAuthStore } from '../store/auth.store'
 
 const NavBar = () => {
-    const { isAuthenticated, fetchUser, loading, logout } = useAuthStore()
+    const { isAuthenticated, user, fetchUser, loading, logout } = useAuthStore()
     useEffect(() => {
         if (!isAuthenticated)
             fetchUser()
@@ -21,7 +21,7 @@ const NavBar = () => {
                         <Spinner />
                         :
                         isAuthenticated ? <>
-                            <NavLink to={"/dashboard"} className="mx-2 bg-blue-600 text-white px-6 py-2 rounded-lg hover:bg-blue-700 transition">لوحة التحكم</NavLink>
+                            <NavLink to={user?.role == "manager" ? "/manager-dashboard" : "/dashboard"} className="mx-2 bg-blue-600 text-white px-6 py-2 rounded-lg hover:bg-blue-700 transition">لوحة التحكم</NavLink>
                             <button
                                 onClick={() => logout()}
                                 className="mx-2 bg-blue-600 text-white px-6 py-2 rounded-lg hover:bg-blue-700 transition">
