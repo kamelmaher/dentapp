@@ -1,7 +1,6 @@
 import { create } from "zustand/react";
 import { clinic } from "../services/clinic";
 import type { Clinic } from "../types/Clinic";
-import { auth } from "../services/auth";
 type clinicState = {
     loading: boolean,
     page: number,

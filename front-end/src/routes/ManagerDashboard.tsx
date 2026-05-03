@@ -6,7 +6,7 @@ import { plans } from "../data/constants";
 // import Pagination from "../components/Paginiation";
 
 const ManagerDashboard = () => {
-    const { loading, users, page, getUsers } = useUserStore()
+    const { loading, users, getUsers } = useUserStore()
     const { clinics, loading: clinicsLoading, loadClinics, subscribe } = useClinicStore()
     useEffect(() => {
         getUsers()
