@@ -2,6 +2,7 @@ import { create } from "zustand";
 import { auth } from "../services/auth";
 import type { registerType } from "../types/authTypes";
 import type { User } from "../types/User";
+import { showError, showSuccess } from "../utils/toast";
 
 
 
@@ -54,17 +55,20 @@ export const useAuthStore = create<AuthState>((set) => ({
             const response = await auth.register(data)
             if (response.data.status === "success") {
                 await useAuthStore.getState().fetchUser()
+                showSuccess("تم التسجيل بنجاح")
                 return { success: true }
             } else {
                 set({
-                    err: "Something went wrong"
+                    err: response.data.data
                 })
+                showError(response.data.data)
                 return { success: false }
             }
         } catch (err) {
             set({
                 err: "Something went wrong"
             })
+            showError("حدث خطا أثناء انشاء الحساب")
             return { success: false }
         } finally {
             set({
@@ -80,14 +84,17 @@ export const useAuthStore = create<AuthState>((set) => ({
             const response = await auth.login(data);
             if (response.data.status === "success") {
                 await useAuthStore.getState().fetchUser();
+                showSuccess("تم تسجيل الدخول بنجاح")
                 return { success: true }
             }
             else {
                 set({ err: response.data.data || "invalid credintials" })
+                showError(response.data.data)
                 return { success: false }
             }
         } catch (err) {
-            set({ err: "something went wrong" })
+            set({ err: "حصل خطا ما" })
+            showError("حصل خطا ما")
             return { success: false }
         } finally {
             set({ authLoading: false })
@@ -96,13 +103,18 @@ export const useAuthStore = create<AuthState>((set) => ({
 
     logout: async () => {
         set({ loading: true })
-        await auth.logout();
-
-        set({
-            user: null,
-            isAuthenticated: false,
-            loading: false
-        });
+        const res = await auth.logout();
+        if (res.data.status === "success") {
+            set({
+                user: null,
+                isAuthenticated: false,
+                loading: false
+            });
+            showSuccess("تم تسجيل الخروج بنجاح")
+        } else {
+            set({ err: res.data.data })
+            showError(res.data.data)
+        }
     },
 
     updateUser: async (data) => {
@@ -111,9 +123,14 @@ export const useAuthStore = create<AuthState>((set) => ({
             const res = await auth.updateUser(data)
             if (res.data.status === "success") {
                 set({ user: res.data.data })
+                showSuccess("تم التحديث بنجاح")
+            } else {
+                set({ err: res.data.data })
+                showError(res.data.data)
             }
         } catch (err) {
-            set({ err: "Something went wrong" })
+            set({ err: "حصل خطا ما" })
+            showSuccess("حصل خطا ما")
         } finally {
             set({ loading: false })
         }

@@ -1,6 +1,7 @@
 import { create } from "zustand/react";
 import { clinic } from "../services/clinic";
 import type { Clinic } from "../types/Clinic";
+import { showError, showSuccess } from "../utils/toast";
 type clinicState = {
     loading: boolean,
     page: number,
@@ -27,6 +28,7 @@ export const useClinicStore = create<clinicState>((set, get) => ({
     err: null,
     clinics: [],
     selectedClinic: {} as Clinic,
+
     loadClinics: async (page) => {
         set({ loading: true })
         try {
@@ -36,13 +38,14 @@ export const useClinicStore = create<clinicState>((set, get) => ({
                     clinics: response.data.data,
                     totalPages: response.data.pages
                 })
-            } else set({ err: response.data.data })
+            } else showError(response.data.data)
         } catch (err) {
-            set({ err: "something went wrong" })
+            showError()
         } finally {
             set({ loading: false })
         }
     },
+
     getClinicBySlug: async (slug) => {
         try {
             set({ clinicLoading: true })
@@ -51,13 +54,14 @@ export const useClinicStore = create<clinicState>((set, get) => ({
             if (response.data.status == "success") {
                 set({ selectedClinic: response.data.data })
             }
-            else set({ err: "Failed Loading Clinic" })
+            else showError(response.data.data)
         } catch (err) {
-            set({ err: "Something Went Wrong" })
+            showError()
         } finally {
             set({ clinicLoading: false })
         }
     },
+
     getUserClinic: async () => {
         set({ loading: true })
         try {
@@ -70,18 +74,25 @@ export const useClinicStore = create<clinicState>((set, get) => ({
             set({ loading: false })
         }
     },
+
     updateClinic: async (data) => {
         set({ updateLoading: true })
         try {
             const res = await clinic.updateClinic(data)
-            if (res.data.status === "success") set({ selectedClinic: res.data.data })
-            else set({ err: "updating failed" })
+            if (res.data.status === "success") {
+                set({ selectedClinic: res.data.data })
+                showSuccess()
+            }
+            else {
+                showError(res.data.data)
+            }
         } catch (err) {
-            set({ err: "Something went wrong" })
+            showError()
         } finally {
             set({ updateLoading: false })
         }
     },
+
     subscribe: async (clinicId, plan) => {
         try {
             const res = await clinic.subscribe(clinicId, plan)
@@ -93,10 +104,10 @@ export const useClinicStore = create<clinicState>((set, get) => ({
                             : clinic
                     ),
                 }))
+                showSuccess()
             }
         } catch (err) {
-            set({ err: "Something went wrong" })
+            showError()
         }
-
     }
 }))

@@ -63,7 +63,7 @@ const NavBar = () => {
 
                             {/* Dropdown */}
                             <div
-                                className={`absolute left-0 mt-2 w-48 bg-white rounded-xl shadow-lg border transition-all duration-200 ${dropdownOpen ? "opacity-100 translate-y-0" : "opacity-0 translate-y-2 pointer-events-none"
+                                className={`absolute left-0 mt-2 w-48 bg-white rounded-xl shadow-lg transition-all duration-200 ${dropdownOpen ? "opacity-100 translate-y-0" : "opacity-0 translate-y-2 pointer-events-none"
                                     }`}
                             >
                                 <NavLink

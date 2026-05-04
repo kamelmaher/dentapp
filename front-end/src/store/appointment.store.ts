@@ -1,6 +1,7 @@
 import { create } from "zustand";
 import { appointment } from "../services/appointment";
 import type { Appointment } from "../types/Appointment";
+import { showError, showSuccess } from "../utils/toast";
 
 type appointmentState = {
     appointments: Appointment[]
@@ -36,19 +37,27 @@ export const useAppointmentStore = create<appointmentState>((set, get) => ({
     page: 1,
     totalPages: 0,
     setPage: (page) => set({ page }),
+
     createAppointment: async (data) => {
         set({ loading: true, err: null })
         try {
             const response = await appointment.create(data)
-            if (response.data.status === "success")
+            if (response.data.status === "success") {
                 set({ appointments: [...get().appointments, response.data.data] })
-            else set({ err: "error while creating appointment" })
+                showSuccess("تم انشاء الموعد بنجاح")
+            }
+            else {
+                set({ err: "error while creating appointment" })
+                showError(response.data.data)
+            }
         } catch (err) {
             set({ err: "something went wrong" })
+            showError("حدث خطا ما")
         } finally {
             set({ loading: false })
         }
     },
+
     loadAppointments: async (page) => {
         try {
             set({ loading: true })
@@ -62,12 +71,18 @@ export const useAppointmentStore = create<appointmentState>((set, get) => ({
             set({ loading: false })
         }
     },
+
     getTodayAppointments: async () => {
-        const res = await appointment.getTodayAppointments()
-        if (res.data.status === "success")
-            set({ todayAppointments: res.data.data })
-        else set({ err: res.data.data })
+        try {
+            const res = await appointment.getTodayAppointments()
+            if (res.data.status === "success")
+                set({ todayAppointments: res.data.data })
+            else set({ err: res.data.data })
+        } catch (err) {
+            showError("حدث خطا في تحميل مواعيد اليوم")
+        }
     },
+
     getUpcomingAppointments: async () => {
         set({ loading: true })
         try {
@@ -76,24 +91,25 @@ export const useAppointmentStore = create<appointmentState>((set, get) => ({
                 set({ upComingAppointments: res.data.data })
             else set({ err: res.data.data })
         } catch (err) {
-            set({ err: "Something Went Wrong" })
+            showError("حدث خطا في تحميل المواعيد القادمة")
         } finally {
             set({ loading: false })
         }
     },
+
     getExpiredAppointments: async (page) => {
         try {
             set({ loading: true })
             const res = await appointment.getExpiredAppointments(page)
             if (res.data.status == "success")
                 set({ expiredAppointments: res.data.data })
-            else set({ err: res.data.data })
         } catch (err) {
-            set({ err: "Something went Wrong" })
+            showError("حدث خطا في تحميل المواعيد المنتهية")
         } finally {
             set({ loading: false })
         }
     },
+
     confirmAppointment: async (id) => {
         if (!id) return
         set({ optionsLoading: true })
@@ -107,15 +123,18 @@ export const useAppointmentStore = create<appointmentState>((set, get) => ({
                             : appt
                     ),
                 }));
+                showSuccess("تم التاكيد بنجاح")
             }
-            else
-                set({ err: "Failed to confirm Appointment" })
+            else {
+                showError(res.data.data)
+            }
         } catch (err) {
-            set({ err: "Something went wrong" })
+            showError("فشل التأكيد! يرجى المحاولة لاحقا.")
         } finally {
             set({ optionsLoading: false })
         }
     },
+
     declineAppointment: async (id) => {
         if (!id) return
         set({ optionsLoading: true })
@@ -129,14 +148,16 @@ export const useAppointmentStore = create<appointmentState>((set, get) => ({
                             : appt
                     ),
                 }));
+                showSuccess("تم الالغاء بنجاح")
             }
-            else set({ err: "Failed to decline Appointment" })
+            else showError(res.data.data)
         } catch (err) {
-            set({ err: "Something went wrong" })
+            showError("فشل الالغاء! حاول مرة أخرى لاحقا ")
         } finally {
             set({ optionsLoading: false })
         }
     },
+
     search: async (term) => {
         set({ loading: true })
         try {
@@ -148,10 +169,12 @@ export const useAppointmentStore = create<appointmentState>((set, get) => ({
             set({ loading: false })
         }
     },
+
     getBooked: async (date: string) => {
         const res = await appointment.getBooked(date)
         if (res.data.status === "success")
             return res.data.data
         else return []
     }
+
 }));

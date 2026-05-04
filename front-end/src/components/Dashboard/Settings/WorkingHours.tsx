@@ -1,3 +1,4 @@
+/* eslint-disable react-hooks/set-state-in-effect */
 import { useEffect, useState } from "react";
 import { DEFAULT_CLINIC_WORKING_HOURS, DAYS } from "../../../data/clinic";
 import { useClinicStore } from "../../../store/clinic.store";
@@ -70,7 +71,7 @@ export default function WorkingHours() {
 
                         {/* Time Inputs */}
                         {day.isOpen && (
-                            <div className="flex items-center gap-2">
+                            <div className="flex items-start gap-2 flex-col sm:flex-row">
 
                                 <div className="flex flex-col">
                                     <label className="text-xs text-gray-500">من</label>

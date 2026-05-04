@@ -21,7 +21,7 @@ const LoginPage: React.FC = () => {
 
                 {/* Logo & Header */}
                 <div className="text-center mb-10">
-                    <div className="text-3xl font-bold text-blue-600 mb-2">DentaStack</div>
+                    <div className="text-3xl font-bold text-blue-600 mb-2">Smile Desk</div>
                     <h2 className="text-2xl font-bold text-gray-800">مرحباً بعودتك!</h2>
                     <p className="text-gray-500 mt-2">سجل دخولك لإدارة عيادتك ومواعيدك</p>
                 </div>
