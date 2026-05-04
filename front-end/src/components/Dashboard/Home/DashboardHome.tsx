@@ -50,7 +50,7 @@ export default function DashboardHome() {
                         {/* Schedule */}
                         <AppointmentsList title="اليوم" list={todayAppointments} />
                         {/* Upcoming */}
-                        <AppointmentsList title="قادمة" list={upComingAppointments} />
+                        <AppointmentsList title="في الأيام العشر القادمة" list={upComingAppointments} />
 
                     </div>
                 </>

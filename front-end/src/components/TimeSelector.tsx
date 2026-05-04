@@ -4,7 +4,6 @@ import type { WorkingHours } from "../types/Clinic";
 
 type Props = {
     workingHours: WorkingHours;
-    // booked: Record<string, number[]>;
     onSelect: (dateTime: string) => void;
 };
 
@@ -12,7 +11,7 @@ export default function TimeSelector({ workingHours, onSelect }: Props) {
     const [date, setDate] = useState("");
     const [slots, setSlots] = useState<number[]>([]);
     const [selected, setSelected] = useState<number | null>(null);
-    const [bookedSlots, setBooked] = useState<number[]>([])
+    const [booked, setBooked] = useState<number[]>([])
     const { getBooked } = useAppointmentStore()
 
     const getMinDate = () => {
@@ -32,6 +31,7 @@ export default function TimeSelector({ workingHours, onSelect }: Props) {
 
     // fetch booked hours 
     useEffect(() => {
+        if (!date) return
         const fetchBooked = async () => {
             const bookedData = await getBooked(date)
             setBooked(bookedData)
@@ -42,7 +42,7 @@ export default function TimeSelector({ workingHours, onSelect }: Props) {
     useEffect(() => {
         if (!date) return;
 
-        const day = new Date(date).getDay();
+        const day = new Date(date + "T00:00:00").getDay();
         const workingDay = workingHours.find((d) => d.day === day);
 
         if (!workingDay || !workingDay.isOpen) {
@@ -67,54 +67,51 @@ export default function TimeSelector({ workingHours, onSelect }: Props) {
     return (
         <div className="space-y-4">
 
-            {/* DATE */}
             <div>
-                <label className="text-sm text-gray-600 block mb-1">التاريخ</label>
+                <label>التاريخ</label>
                 <input
                     type="date"
                     min={getMinDate()}
                     value={date}
                     onChange={(e) => setDate(e.target.value)}
-                    className="w-full border p-3 rounded-xl focus:ring-2 focus:ring-blue-200"
+                    className="w-full border p-3 rounded-lg"
                 />
             </div>
 
-            {/* SLOTS */}
+            {/* ⏰ TIME */}
             {slots.length > 0 && (
                 <div>
-                    <p className="text-sm text-gray-600 mb-2">اختر الوقت</p>
-
+                    <p>اختر الوقت</p>
                     <div className="grid grid-cols-4 gap-2">
                         {slots.map((h) => {
-                            const isBooked = bookedSlots.includes(h);
+                            const isBooked = booked.includes(h);
+
                             return (
                                 <button
                                     type="button"
-                                    disabled={isBooked}
                                     key={h}
+                                    disabled={isBooked}
                                     onClick={() => setSelected(h)}
-                                    className={`p-3 rounded-xl text-sm border transition
-                                    ${isBooked ? "bg-gray-100 text-gray-400 cursor-not-allowed"
+                                    className={`p-2 rounded border
+                  ${isBooked
+                                            ? "bg-gray-200 cursor-not-allowed"
                                             : selected === h
                                                 ? "bg-blue-600 text-white"
-                                                : "hover:bg-blue-50"}`}
+                                                : "hover:bg-blue-50"
+                                        }`}
                                 >
                                     {h >= 12 ? `${h - 12 || 12} PM` : `${h} AM`}
                                 </button>
-                            )
+                            );
                         })}
                     </div>
                 </div>
-            )
-            }
+            )}
 
-            {
-                slots.length === 0 && date && (
-                    <p className="text-red-500 text-sm">
-                        لا يوجد مواعيد متاحة في هذا اليوم
-                    </p>
-                )
-            }
+            {/* ❌ لا يوجد مواعيد */}
+            {date && slots.length === 0 && (
+                <p className="text-red-500">هذا اليوم غير متاح</p>
+            )}
 
         </div >
     );

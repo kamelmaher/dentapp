@@ -14,7 +14,9 @@ export default function ClinicPage() {
         if (!slug) return;
         getClinicBySlug(slug);
     }, [slug, getClinicBySlug]);
-
+    useEffect(() => {
+        scrollTo(0, 0)
+    }, [])
     return (
         <div className="min-h-screen bg-gray-50" dir="rtl">
             {clinicLoading ? (
@@ -89,14 +91,31 @@ export default function ClinicPage() {
                         {/* Info Column */}
                         <div className="bg-white p-8 rounded-2xl shadow-sm space-y-6">
                             <h2 className="text-xl font-semibold">معلومات العيادة</h2>
-                            <div>
-                                <p className="text-gray-500 text-sm">العنوان</p>
-                                <p className="font-medium">{selectedClinic.address}</p>
-                            </div>
-                            <div>
-                                <p className="text-gray-500 text-sm">رقم الهاتف</p>
-                                <p className="font-medium">{selectedClinic.phoneNumber}</p>
-                            </div>
+
+                            {
+                                selectedClinic.address &&
+                                <div>
+                                    <p className="text-gray-500 text-sm">العنوان</p>
+                                    <p className="font-medium">{selectedClinic.address}</p>
+                                </div>
+                            }
+
+                            {
+                                selectedClinic.phoneNumber &&
+                                <div>
+                                    <p className="text-gray-500 text-sm">رقم الهاتف</p>
+                                    <p className="font-medium">{selectedClinic.phoneNumber}</p>
+                                </div>
+                            }
+
+                            {
+                                selectedClinic.email &&
+                                <div>
+                                    <p className="text-gray-500 text-sm">الايميل</p>
+                                    <p className="font-medium">{selectedClinic.email}</p>
+                                </div>
+                            }
+
                             <div>
                                 <p className="text-gray-500 text-sm">أوقات العمل</p>
                                 <p className="font-medium">{formatWorkingHours(selectedClinic.workingHours!)}</p>

@@ -1,4 +1,4 @@
-import React, { useEffect, useState } from "react";
+import React, { useCallback, useEffect, useState } from "react";
 import TimeSelector from "./TimeSelector";
 import { useParams } from "react-router";
 import { appointmentSchema } from "../data/Schemas";
@@ -12,6 +12,7 @@ export default function BookingForm() {
     const { getClinicBySlug, selectedClinic } = useClinicStore()
     const [open, setOpen] = useState(false);
     const [formErr, setFormErr] = useState("")
+
     const [formData, setFormData] = useState({
         patientName: "",
         patientAddress: "",
@@ -37,7 +38,7 @@ export default function BookingForm() {
         const result = appointmentSchema.safeParse(formData)
         if (result.success) {
             await createAppointment({ ...formData, clinicId: selectedClinic._id })
-            if (!err) setOpen(false)
+            if (!err || !formErr) setOpen(false)
         } else {
             setFormErr("الرجاء تأكد من صحة المعلومات")
         }
@@ -47,8 +48,13 @@ export default function BookingForm() {
         setFormData({ ...formData, [e.target.name]: e.target.value })
     };
 
-    const selectDate = (date: string) => setFormData({ ...formData, date: date })
-
+    const handleSelect = useCallback((dateTime: string) => {
+        setFormData(prev => ({
+            ...prev,
+            date: dateTime
+        }));
+    }, []);
+    
     return (
         <>
             {/* زر الحجز */}
@@ -106,7 +112,7 @@ export default function BookingForm() {
                             />
 
                             {/* Date & Time Selector */}
-                            <TimeSelector onSelect={selectDate} workingHours={selectedClinic.workingHours!} />
+                            <TimeSelector onSelect={handleSelect} workingHours={selectedClinic.workingHours!} />
 
 
                             <textarea

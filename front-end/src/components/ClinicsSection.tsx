@@ -36,8 +36,13 @@ export default function ClinicsSection() {
                                     to={`/clinic/${clinic.slug}`}
                                     className="bg-white rounded-2xl shadow-sm border hover:shadow-xl hover:-translate-y-1 transition p-6 block"
                                 >
-                                    <div className="w-14 h-14 rounded-xl bg-blue-100 flex items-center justify-center text-blue-600 font-bold text-xl mb-4">
-                                        {clinic.clinicName.charAt(0)}
+                                    <div className="w-25 h-25 rounded-xl bg-blue-100 flex items-center justify-center text-blue-600 font-bold text-xl mb-4">
+                                        {
+                                            clinic.logo ?
+                                                <img src={clinic.logo} alt="" />
+                                                :
+                                                clinic.clinicName.charAt(0)
+                                        }
                                     </div>
 
                                     <h3 className="text-xl font-bold text-gray-900 mb-2">

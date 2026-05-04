@@ -3,10 +3,19 @@ const statusText = require("../data/statusText")
 const { MAIN_LIMIT } = require("../data/constants")
 const { ACCEPTED, DECLINED } = require("../data/appointmentStatus")
 const { formatDate } = require("../utils/index")
+const { removeCancelled } = require("../utils/appointments")
+const { json } = require("zod")
+
 const createAppointment = async (req, res) => {
-    const data = new Appointment(req.body)
-    await data.save()
-    res.json({ status: statusText.SUCCESS, data })
+    const data = req.body
+    if (!data.clinicId) return res.json({ status: statusText.ERROR, data: "Invalid Data" })
+    try {
+        const appointment = new Appointment(data)
+        await appointment.save()
+        res.json({ status: statusText.SUCCESS, appointment })
+    } catch (err) {
+        res.json({ status: statusText.ERROR, data: "Internal Server Error" })
+    }
 }
 
 const loadAppointments = async (req, res) => {
@@ -42,11 +51,13 @@ const getTodayAppointments = async (req, res) => {
         }
     }).sort({ date: 1 });
 
-    res.json({ status: statusText.SUCCESS, data: appointments })
+    const results = removeCancelled(appointments)
+    res.json({ status: statusText.SUCCESS, data: results })
 }
 
 const getUpcomingAppointments = async (req, res) => {
     const user = req.user;
+    if (!user) return res.json({ status: statusText.ERROR, data: "UnAuthorized" })
 
     const tomorrow = new Date();
     tomorrow.setDate(tomorrow.getDate() + 1);
@@ -66,7 +77,8 @@ const getUpcomingAppointments = async (req, res) => {
         date: { $gte: start, $lte: end }
     }).sort({ date: 1 });
 
-    res.json({ status: "success", data: appointments });
+    const results = removeCancelled(appointments)
+    res.json({ status: statusText.SUCCESS, data: results })
 };
 
 const getExpiredAppointments = async (req, res) => {

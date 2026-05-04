@@ -10,10 +10,12 @@ const validate = require("../middleware/validate.middleware")
 const verifyToken = require("../middleware/verifyToken")
 const checkSubscription = require("../middleware/checkSubscription")
 
+
+router.post("/", validate(appointmentSchema), createAppointment)
+
 router.use(verifyToken)
 router.use(checkSubscription)
 
-router.post("/", validate(appointmentSchema), createAppointment)
 
 router.get("/", loadAppointments)
 router.get("/today", getTodayAppointments)
