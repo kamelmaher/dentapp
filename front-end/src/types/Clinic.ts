@@ -12,7 +12,7 @@ export type Clinic = {
     logo?: string
     createdAt: string
     validTo: string
-    workingHours?: WorkingHours
+    workingHours?: WorkingHours[]
     plan: typeof plans[keyof typeof plans]
 }
 export type WorkingHours = {
@@ -20,4 +20,4 @@ export type WorkingHours = {
     isOpen: boolean,
     start: string,
     end: string
-}[]
+}

@@ -33,7 +33,7 @@ export const useAuthStore = create<AuthState>((set) => ({
             const res = await auth.me();
             if (res.data.status == "success")
                 set({
-                    user: res.data.data,
+                    user: res.data,
                     isAuthenticated: true,
                     loading: false,
                 });
@@ -112,8 +112,8 @@ export const useAuthStore = create<AuthState>((set) => ({
             });
             showSuccess("تم تسجيل الخروج بنجاح")
         } else {
-            set({ err: res.data.data })
-            showError(res.data.data)
+            set({ err: res.data as string })
+            showError(res.data as string)
         }
     },
 
@@ -122,11 +122,11 @@ export const useAuthStore = create<AuthState>((set) => ({
         try {
             const res = await auth.updateUser(data)
             if (res.data.status === "success") {
-                set({ user: res.data.data })
+                set({ user: res.data })
                 showSuccess("تم التحديث بنجاح")
             } else {
-                set({ err: res.data.data })
-                showError(res.data.data)
+                set({ err: res.data })
+                showError(res.data)
             }
         } catch (err) {
             set({ err: "حصل خطا ما" })

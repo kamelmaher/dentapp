@@ -1,6 +1,8 @@
-export const AppointmentFilter = [
-    { value: "", text: "كل المواعيد" },
-    { value: "today", text: "مواعيد اليوم" },
-    { value: "upcoming", text: "مواعيد قادمة" },
-    { value: "expired", text: "مواعيد منتهية" },
-]
+export const AppointmentFilter = {
+    ALL: { value: "", text: "كل المواعيد" },
+    TODAY: { value: "today", text: "مواعيد اليوم" },
+    UPCOMING: { value: "upcoming", text: "مواعيد قادمة" },
+    EXPIRED: {
+        value: "expired", text: "مواعيد منتهية"
+    },
+}

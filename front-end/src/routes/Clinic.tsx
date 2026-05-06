@@ -1,10 +1,10 @@
 import { useEffect } from "react";
 import { useParams } from "react-router";
-import BookingForm from "../components/BookForm";
 import Spinner from "../components/Spinner";
 import { features } from "../data/Features";
 import { useClinicStore } from "../store/clinic.store";
 import { formatWorkingHours } from "../utils/clinics";
+import BookingForm from "../components/Dashboard/BookForm";
 
 export default function ClinicPage() {
     const { slug } = useParams();

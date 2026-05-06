@@ -1,3 +1,4 @@
+/* eslint-disable @typescript-eslint/no-unused-vars */
 import { create } from "zustand/react";
 import { clinic } from "../services/clinic";
 import type { Clinic } from "../types/Clinic";

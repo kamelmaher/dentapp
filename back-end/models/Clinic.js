@@ -1,6 +1,7 @@
 const plans = require("../data/plans")
 const mongoose = require("mongoose")
 const { DEFAULT_CLINIC_WORKING_HOURS } = require("../data/clinic")
+
 const clinicSchema = new mongoose.Schema({
     clinicId: String,
     userId: String,

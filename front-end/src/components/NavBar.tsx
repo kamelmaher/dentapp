@@ -37,17 +37,18 @@ const NavBar = () => {
                 {/* Desktop */}
                 <div className="hidden md:flex items-center gap-6">
 
-                    <NavLink to="#features" className="text-gray-600 hover:text-blue-600 transition">
+                    <NavLink to="/features" className="text-gray-600 hover:text-blue-600 transition">
                         المميزات
+                    </NavLink>
+
+                    <NavLink to="/pricing" className="text-gray-600 hover:text-blue-600 transition">
+                        الأسعار
                     </NavLink>
 
                     <NavLink to="/clinics" className="text-gray-600 hover:text-blue-600 transition">
                         العيادات
                     </NavLink>
 
-                    <NavLink to="#pricing" className="text-gray-600 hover:text-blue-600 transition">
-                        الأسعار
-                    </NavLink>
 
                     {loading ? (
                         <Spinner />

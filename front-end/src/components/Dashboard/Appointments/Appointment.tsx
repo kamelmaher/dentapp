@@ -1,5 +1,6 @@
 import type { Appointment as AppointmentType } from "../../../types/Appointment"
-import { getAppointmentDate, getAppointmentHour, checkExpired } from "../../../utils/appointments"
+import { checkExpired, getFullDate } from "../../../utils/appointments"
+
 import AppointmentOptions from "./AppointmentOptions"
 
 type AppointmentProps = {
@@ -7,9 +8,7 @@ type AppointmentProps = {
 }
 const Appointment = ({ appointment }: AppointmentProps) => {
     const { _id, patientName, patientAddress, patientPhoneNumber, status, date, notes, patientEmail } = appointment
-
-    const appointmentDate = getAppointmentDate(date)
-    const appointmentHour = getAppointmentHour(date)
+    const appointmentDate = getFullDate(date)
     const isExpired = checkExpired(date)
     return (
         <div
@@ -27,9 +26,7 @@ const Appointment = ({ appointment }: AppointmentProps) => {
                     }
                 </div>
                 <div className="flex gap-2 text-gray-500 text-sm">
-                    <p> {appointmentHour}</p>
-                    <span>-</span>
-                    <p>{appointmentDate}</p>
+                    <p> {appointmentDate}</p>
                 </div>
                 <div className="text-[14px] mt-2">
                     <p className="text-blue-600 font-bold">بيانات المريض</p>

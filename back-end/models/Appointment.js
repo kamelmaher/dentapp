@@ -9,8 +9,8 @@ const appointmentSchema = new mongoose.Schema({
         default: PENDING
     },
     date: {
-        type: String,
-        required: true
+        type: Date,
+        required: true,
     },
 
     // Patient Data

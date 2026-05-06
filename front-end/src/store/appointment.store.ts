@@ -1,3 +1,4 @@
+/* eslint-disable @typescript-eslint/no-unused-vars */
 import { create } from "zustand";
 import { appointment } from "../services/appointment";
 import type { Appointment } from "../types/Appointment";
@@ -63,7 +64,7 @@ export const useAppointmentStore = create<appointmentState>((set, get) => ({
             set({ loading: true })
             const res = await appointment.loadAppointments(page)
             if (res.data.status == "success")
-                set({ appointments: res.data.data, totalPages: res.data.pages })
+                set({ appointments: res.data.data, totalPages: res.data.totalPages })
             else set({ err: res.data.data })
         } catch (err) {
             set({ err: "Something went Wrong" })

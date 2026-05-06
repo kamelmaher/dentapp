@@ -9,3 +9,5 @@ export type Appointment = {
     patientAddress: string
     notes?: string
 }
+
+export type AppointmentFilter = { status?: string, period?: string, search?: string, page?: number }

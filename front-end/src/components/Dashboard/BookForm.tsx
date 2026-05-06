@@ -1,17 +1,17 @@
-import React, { useCallback, useEffect, useState } from "react";
-import TimeSelector from "./TimeSelector";
-import { useParams } from "react-router";
-import { appointmentSchema } from "../data/Schemas";
-import { useAppointmentStore } from "../store/appointment.store";
-import { useClinicStore } from "../store/clinic.store";
-import type { Appointment } from "../types/Appointment";
+import { useState, useEffect, useCallback } from "react";
+import { useParams } from "react-router-dom";
+import { appointmentSchema } from "../../data/Schemas";
+import { useAppointmentStore } from "../../store/appointment.store";
+import { useClinicStore } from "../../store/clinic.store";
+import type { Appointment } from "../../types/Appointment";
+import TimeSelector from "../TimeSelector";
+
 
 export default function BookingForm() {
     const { slug } = useParams()
     const { createAppointment, loading, err, } = useAppointmentStore()
     const { getClinicBySlug, selectedClinic } = useClinicStore()
     const [open, setOpen] = useState(false);
-    const [formErr, setFormErr] = useState("")
 
     const [formData, setFormData] = useState({
         patientName: "",
@@ -31,16 +31,16 @@ export default function BookingForm() {
     }, [getClinicBySlug, slug])
 
     const handleSubmit = async (e: React.FormEvent) => {
-        setFormErr("")
         e.preventDefault();
         if (!slug) return
         if (!selectedClinic._id) return
         const result = appointmentSchema.safeParse(formData)
         if (result.success) {
             await createAppointment({ ...formData, clinicId: selectedClinic._id })
-            if (!err || !formErr) setOpen(false)
-        } else {
-            setFormErr("الرجاء تأكد من صحة المعلومات")
+            if (!err) {
+                setOpen(false)
+                setFormData({} as Appointment)
+            }
         }
     };
 
@@ -54,7 +54,7 @@ export default function BookingForm() {
             date: dateTime
         }));
     }, []);
-    
+
     return (
         <>
             {/* زر الحجز */}
@@ -129,12 +129,7 @@ export default function BookingForm() {
                                     {err}
                                 </p>
                             }
-                            {
-                                formErr &&
-                                <p className="text-center text-red-600 bg-red-50 border border-red-200 rounded-xl py-2 mt-3 text-sm font-medium">
-                                    {formErr}
-                                </p>
-                            }
+
                             {/* Actions */}
                             <div className="flex justify-between items-center pt-2">
 

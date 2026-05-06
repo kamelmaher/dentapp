@@ -5,23 +5,57 @@ const { ACCEPTED, DECLINED } = require("../data/appointmentStatus")
 const { formatDate } = require("../utils/index")
 const { removeCancelled } = require("../utils/appointments")
 const { json } = require("zod")
+const dayjs = require('dayjs');
 
 const createAppointment = async (req, res) => {
-    const data = req.body
-    if (!data.clinicId) return res.json({ status: statusText.ERROR, data: "Invalid Data" })
+    const { clinicId, ...data } = req.body;
+
     try {
-        const appointment = new Appointment(data)
-        await appointment.save()
-        res.json({ status: statusText.SUCCESS, appointment })
+        if (!clinicId) return res.تson({ status: statusText.ERROR, data: "يجب اختيار عيادة" })
+        if (!data.date) {
+            return res.status(400).json({ status: statusText.ERROR, message: "التاريخ مطلوب" });
+        }
+
+        if (dayjs(data.date).isBefore(dayjs())) {
+            return res.status(400).json({ status: statusText.ERROR, data: "لا يمكن حجز موعد في تاريخ سابق" });
+        }
+
+        const existingAppointment = await Appointment.findOne({
+            clinicId,
+            date: data.date
+        });
+
+        if (existingAppointment) {
+            return res.status(400).json({
+                status: statusText.ERROR,
+                data: "هذا الموعد محجوز مسبقاً، يرجى اختيار وقت آخر"
+            });
+        }
+
+        const newAppointment = new Appointment({
+            clinicId,
+            ...data,
+        });
+
+        await newAppointment.save();
+
+        return res.status(201).json({
+            status: statusText.SUCCESS,
+            data: newAppointment
+        });
+
     } catch (err) {
-        res.json({ status: statusText.ERROR, data: "Internal Server Error" })
+        return res.status(500).json({
+            status: statusText.ERROR,
+            data: "حدث خطأ تقني، يرجى المحاولة لاحقاً"
+        });
     }
 }
 
 const loadAppointments = async (req, res) => {
     const user = req.user;
     const page = req.query.page
-    // res.send(req.query.page)
+
     const skip = MAIN_LIMIT * (+page - 1)
     if (!user) return res.json({ status: statusText.ERROR, data: "UnAuthorized" })
     const appointments = await Appointment.find({ clinicId: user.clinicId }).limit(MAIN_LIMIT).skip(skip)
@@ -33,68 +67,74 @@ const loadAppointments = async (req, res) => {
         data: appointments,
         pages: Math.ceil(total / MAIN_LIMIT)
     });
+
 }
 
 const getTodayAppointments = async (req, res) => {
     const user = req.user
+    if (!user) return res.json({ status: statusText.ERROR, data: "UnAuthorized" })
+    try {
+        const startOfDay = dayjs().startOf('day').toDate();
 
-    const today = formatDate(new Date());
+        const startOfNextDay = dayjs().add(1, 'day').startOf('day').toDate();
 
-    const start = `${today}T00:00:00`;
-    const end = `${today}T23:59:59`;
+        const appointments = await Appointment.find({
+            clinicId: user.clinicId,
+            date: {
+                $gte: startOfDay,
+                $lt: startOfNextDay
+            }
+        });
 
-    const appointments = await Appointment.find({
-        clinicId: user.clinicId,
-        date: {
-            $gte: start,
-            $lte: end
-        }
-    }).sort({ date: 1 });
-
-    const results = removeCancelled(appointments)
-    res.json({ status: statusText.SUCCESS, data: results })
-}
+        res.json({ status: statusText.SUCCESS, data: appointments });
+    } catch (error) {
+        res.status(500).json({ message: "خطأ في جلب المواعيد", error });
+    }
+};
 
 const getUpcomingAppointments = async (req, res) => {
     const user = req.user;
     if (!user) return res.json({ status: statusText.ERROR, data: "UnAuthorized" })
+    try {
+        const startOfTomorrow = dayjs().add(1, 'day').startOf('day').toDate();
 
-    const tomorrow = new Date();
-    tomorrow.setDate(tomorrow.getDate() + 1);
-    tomorrow.setHours(0, 0, 0, 0);
+        const endOfRange = dayjs().add(11, 'day').startOf('day').toDate();
 
-    const next10Days = new Date();
-    next10Days.setDate(next10Days.getDate() + 10);
-    next10Days.setHours(23, 59, 59, 0);
+        const appointments = await Appointment.find({
+            clinicId: user.clinicId,
+            date: {
+                $gte: startOfTomorrow,
+                $lt: endOfRange
+            }
+        }).sort({ date: 1 });
 
+        return res.json({
+            status: statusText.SUCCESS,
+            data: appointments,
+        });
 
-
-    const start = formatDate(tomorrow);
-    const end = formatDate(next10Days);
-
-    const appointments = await Appointment.find({
-        clinicId: user.clinicId,
-        date: { $gte: start, $lte: end }
-    }).sort({ date: 1 });
-
-    const results = removeCancelled(appointments)
-    res.json({ status: statusText.SUCCESS, data: results })
+    } catch (err) {
+        return res.json({
+            status: statusText.ERROR,
+            data: "Internal Server Error",
+        });
+    }
 };
 
 const getExpiredAppointments = async (req, res) => {
+    const { clinicId } = req.user;
     try {
-        const { clinicId } = req.user;
 
-        const now = formatDate(new Date())
+        const now = dayjs().toDate();
 
-        const appointments = await Appointment.find({
+        const expiredAppointments = await Appointment.find({
             clinicId,
             date: { $lt: now }
         }).sort({ date: -1 });
 
-        res.status(200).json({
+        return res.json({
             status: statusText.SUCCESS,
-            data: appointments
+            data: expiredAppointments
         });
 
     } catch (error) {
@@ -155,29 +195,44 @@ const searchAppointments = async (req, res) => {
 }
 
 const getBooked = async (req, res) => {
-    const { date } = req.query
-    const { clinicId } = req.user
+    const { date } = req.query;
+    const { clinicId } = req.user;
 
-    const start = `${date}T00:00:00`;
-    const end = `${date}T23:59:59`;
+    if (!date) {
+        return res.json({
+            status: statusText.ERROR,
+            data: "Date is required",
+        });
+    }
 
     try {
+        const startOfDay = dayjs(date).startOf('day');
+        const startOfNextDay = startOfDay.add(1, 'day');
+
         const appointments = await Appointment.find({
             clinicId,
-            date: { $gte: start, $lte: end },
-        });
-        const hours = appointments.map((a) => {
-            return new Date(a.date).getHours();
+            date: {
+                $gte: startOfDay.toDate(),
+                $lt: startOfNextDay.toDate()
+            },
         });
 
-        res.json({
-            status: statusText.SUCCESS,
-            data: hours,
+        const bookedHours = appointments.map((a) => {
+            return dayjs(a.date).hour();
         });
+
+        return res.json({
+            status: statusText.SUCCESS,
+            data: bookedHours,
+        });
+
     } catch (err) {
-        res.json({ status: statusText.ERROR, data: "Something went wrong" })
+        return res.json({
+            status: statusText.ERROR,
+            data: "Something went wrong",
+        });
     }
-}
+};
 
 module.exports = {
     createAppointment,

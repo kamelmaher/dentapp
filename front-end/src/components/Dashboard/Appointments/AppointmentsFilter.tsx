@@ -15,11 +15,11 @@ const AppointmentsFilter = ({ handleChangeType, handleSearch }: AppointmentsFilt
                     defaultValue=""
                     onChange={(e) => handleChangeType(e.target.value)}
                 >
-                    {AppointmentFilter.map((item) => (
-                        <option key={item.text} value={item.value}>
+                    {
+                        Object.values(AppointmentFilter).map(item => <option key={item.text} value={item.value}>
                             {item.text}
-                        </option>
-                    ))}
+                        </option>)
+                    }
                 </select>
 
                 {/* Arrow icon */}

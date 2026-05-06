@@ -11,6 +11,8 @@ import Appointments from "./components/Dashboard/Appointments/Appointments";
 import Patients from "./components/Dashboard/Patients/Patients";
 import Settings from "./components/Dashboard/Settings/Settings";
 import ManagerDashboard from "./routes/ManagerDashboard";
+import Prices from "./routes/Prices";
+import FeaturesPage from "./routes/Features";
 
 export const router = createBrowserRouter(
     createRoutesFromElements(
@@ -26,6 +28,8 @@ export const router = createBrowserRouter(
             <Route path="/clinics" element={<ClinicsPage />} />
             <Route path="/login" element={<LoginPage />} />
             <Route path="/register" element={<RegisterPage />} />
+            <Route path="/pricing" element={<Prices />} />
+            <Route path="/features" element={<FeaturesPage />} />
             <Route path="/manager-dashboard" element={<ManagerDashboard />} />
         </Route>
     ))

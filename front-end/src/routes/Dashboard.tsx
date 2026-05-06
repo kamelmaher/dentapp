@@ -1,20 +1,14 @@
 import { useEffect } from "react";
 import { Outlet, useNavigate } from "react-router";
 import Spinner from "../components/Spinner";
-import { useAppointmentStore } from "../store/appointment.store";
 import { useClinicStore } from "../store/clinic.store";
 import DashboardLinks from "../components/Dashboard/DashboardLinks";
+import { useAppointmentStore } from "../store/appointment.store";
 
 export default function Dashboard() {
-    const { getTodayAppointments, getUpcomingAppointments, loadAppointments, getExpiredAppointments, page } = useAppointmentStore()
     const { getUserClinic, selectedClinic, loading: clinicLoading, err } = useClinicStore()
     const navigate = useNavigate()
-
-    useEffect(() => {
-        if (!clinicLoading)
-            if (err)
-                navigate("/")
-    }, [navigate, clinicLoading, err])
+    const { getTodayAppointments, getUpcomingAppointments, loadAppointments, getExpiredAppointments, page } = useAppointmentStore()
 
     useEffect(() => {
         const loadData = async () => {
@@ -35,6 +29,15 @@ export default function Dashboard() {
     useEffect(() => {
         loadAppointments(page)
     }, [loadAppointments, page])
+    useEffect(() => {
+        if (!clinicLoading)
+            if (err)
+                navigate("/")
+    }, [navigate, clinicLoading, err])
+
+    useEffect(() => {
+        getUserClinic()
+    }, [getUserClinic])
 
     return (
         <div className="min-h-screen bg-[#f6f9fc] flex flex-col md:flex-row">

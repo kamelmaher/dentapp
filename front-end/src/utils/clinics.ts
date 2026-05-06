@@ -10,7 +10,7 @@ const DAYS = [
     "السبت",
 ];
 
-export function formatWorkingHours(hours: WorkingHours) {
+export function formatWorkingHours(hours: WorkingHours[]) {
     if (!hours) return
     const openDays = hours
         .filter((d) => d.isOpen)
