@@ -23,7 +23,7 @@ export default function ClinicsPage() {
                         العيادات المسجلة لدينا
                     </h1>
                     <p className="text-gray-500 mt-2">
-                        تصفح جميع العيادات المشتركة في منصة DentApp
+                        تصفح جميع العيادات المشتركة في منصة Smile Desk
                     </p>
                 </div>
 
