@@ -1,6 +1,7 @@
 const plans = require("../data/plans")
 const mongoose = require("mongoose")
 const { DEFAULT_CLINIC_WORKING_HOURS } = require("../data/clinic")
+const dayjs = require("dayjs")
 
 const clinicSchema = new mongoose.Schema({
     clinicId: String,
@@ -32,7 +33,7 @@ const clinicSchema = new mongoose.Schema({
     validTo: {
         type: Date,
         required: true,
-        default: () => new Date(Date.now() + 7 * 24 * 60 * 60 * 1000)
+        default: () => dayjs().add(7, 'day').toDate()
     },
     workingHours: {
         type: [

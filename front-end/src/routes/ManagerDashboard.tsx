@@ -68,6 +68,7 @@ const ManagerDashboard = () => {
                                         >
                                             <option value={plans.MONTHLY}>{plans.MONTHLY}</option>
                                             <option value={plans.ANNUAL}>{plans.ANNUAL}</option>
+                                            <option value={plans.LIFETIME}>{plans.LIFETIME}</option>
                                         </select>
                                     </td>
                                 </tr>

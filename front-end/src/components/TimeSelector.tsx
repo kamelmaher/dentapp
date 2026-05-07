@@ -70,8 +70,7 @@ export default function TimeSelector({ workingHours, onSelect }: Props) {
                     min={getMinDate()}
                     value={date}
                     onChange={(e) => setDate(e.target.value)}
-                    className="w-full border p-3 rounded-lg"
-                />
+                    className="w-full mt-2 rounded-xl p-3 border border-gray-300 bg-white text-gray-700 outline-none transition-all duration-200 focus:border-blue-500 focus:ring-4 focus:ring-blue-100" />
             </div>
 
             {/* ⏰ TIME */}

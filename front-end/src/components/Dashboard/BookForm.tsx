@@ -5,6 +5,7 @@ import { useAppointmentStore } from "../../store/appointment.store";
 import { useClinicStore } from "../../store/clinic.store";
 import type { Appointment } from "../../types/Appointment";
 import TimeSelector from "../TimeSelector";
+import Spinner from "../Spinner";
 
 
 export default function BookingForm() {
@@ -89,7 +90,7 @@ export default function BookingForm() {
                                 placeholder="الاسم الكامل"
                                 value={formData.patientName}
                                 onChange={handleChange}
-                                className="w-full border rounded-xl p-3 focus:ring-2 focus:ring-blue-400"
+                                className="w-full rounded-xl p-3 border border-gray-300 bg-white text-gray-700 outline-none transition-all duration-200 focus:border-blue-500 focus:ring-4 focus:ring-blue-100"
                                 required
                             />
 
@@ -98,7 +99,7 @@ export default function BookingForm() {
                                 placeholder="العنوان"
                                 value={formData.patientAddress}
                                 onChange={handleChange}
-                                className="w-full border rounded-xl p-3 focus:ring-2 focus:ring-blue-400"
+                                className="w-full rounded-xl p-3 border border-gray-300 bg-white text-gray-700 outline-none transition-all duration-200 focus:border-blue-500 focus:ring-4 focus:ring-blue-100"
                                 required
                             />
 
@@ -107,7 +108,7 @@ export default function BookingForm() {
                                 placeholder="رقم الجوال"
                                 value={formData.patientPhoneNumber}
                                 onChange={handleChange}
-                                className="w-full border rounded-xl p-3 focus:ring-2 focus:ring-blue-400"
+                                className="w-full rounded-xl p-3 border border-gray-300 bg-white text-gray-700 outline-none transition-all duration-200 focus:border-blue-500 focus:ring-4 focus:ring-blue-100"
                                 required
                             />
 
@@ -121,8 +122,7 @@ export default function BookingForm() {
                                 value={formData.notes}
                                 onChange={e => setFormData({ ...formData, notes: e.target.value })}
                                 rows={3}
-                                className="w-full border rounded-xl p-3 focus:ring-2 focus:ring-blue-400"
-                            />
+                                className="w-full rounded-xl p-3 border border-gray-300 bg-white text-gray-700 outline-none transition-all duration-200 focus:border-blue-500 focus:ring-4 focus:ring-blue-100" />
                             {
                                 err &&
                                 <p className="text-center text-red-600 bg-red-50 border border-red-200 rounded-xl py-2 mt-3 text-sm font-medium">
@@ -145,7 +145,7 @@ export default function BookingForm() {
                                     type="submit"
                                     className="bg-blue-600 text-white px-6 py-2 rounded-xl hover:bg-blue-700 transition disabled:opacity-50"
                                 >
-                                    {loading ? "جاري الإرسال..." : "تأكيد الحجز"}
+                                    {loading ? <Spinner color="white" /> : "تأكيد الحجز"}
                                 </button>
 
                             </div>

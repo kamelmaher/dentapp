@@ -9,9 +9,10 @@ const { appointmentSchema } = require("../validations/appointment.validation")
 const validate = require("../middleware/validate.middleware")
 const verifyToken = require("../middleware/verifyToken")
 const checkSubscription = require("../middleware/checkSubscription")
+const limiter = require("../middleware/limiter")
 
 
-router.post("/", validate(appointmentSchema), createAppointment)
+router.post("/", limiter(24), validate(appointmentSchema), createAppointment)
 
 router.use(verifyToken)
 router.use(checkSubscription)

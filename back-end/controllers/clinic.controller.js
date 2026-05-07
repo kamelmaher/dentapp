@@ -3,6 +3,7 @@ const statusText = require("../data/statusText");
 const { MAIN_LIMIT } = require("../data/constants");
 const plans = require("../data/plans");
 const getSlug = require("../utils/geSlug")
+const dayjs = require("dayjs")
 
 const getClinics = async (req, res) => {
     const page = req.query.page || 1
@@ -63,32 +64,47 @@ const subscribe = async (req, res) => {
     if (!clinicId) return res.json({ status: statusText.ERROR, data: "User Not Found" })
     const { plan } = req.body
     if (!plan) return res.json({ status: statusText.FAIL, data: "not a Valid Plan" })
-    let newPlan
+
+    let newPlan;
     switch (plan) {
         case plans.MONTHLY: newPlan = plans.MONTHLY
             break;
         case plans.ANNUAL: newPlan = plans.ANNUAL
             break
+        case plans.LIFETIME: newPlan = plans.LIFETIME
+            break
         default: return res.json({ status: statusText.FAIL, data: "not a Valid Plan" })
     }
+
     try {
+        const clinic = await Clinic.findOne({ _id: clinicId })
+        if (!clinic) return res.json({ status: statusText.ERROR, data: "العيادة غير موجودة" })
+
+        const currentValidTo = dayjs(clinic.validTo);
+        const startDate = currentValidTo.isAfter(dayjs()) ? currentValidTo : dayjs();
+
+        let newValidTo;
+        if (newPlan === plans.LIFETIME) {
+            newValidTo = dayjs().add(100, 'year').toDate();
+        } else {
+            const daysToAdd = newPlan === plans.MONTHLY ? 30 : 365;
+            newValidTo = startDate.add(daysToAdd, 'day').toDate();
+        }
+
 
         const updated = await Clinic.findByIdAndUpdate(
             clinicId,
             {
                 plan: newPlan,
-                validTo:
-                    newPlan === plans.MONTHLY
-                        ? new Date(Date.now() + 30 * 24 * 60 * 60 * 1000)
-                        : new Date(Date.now() + 365 * 24 * 60 * 60 * 1000),
+                validTo: newValidTo
             },
             { returnDocument: "after" }
         );
+
         res.json({ status: statusText.SUCCESS, data: updated })
     } catch (err) {
         res.json({ status: statusText.ERROR, data: "Internal Server Error" })
     }
-
 }
 
 module.exports = {

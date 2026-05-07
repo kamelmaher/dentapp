@@ -6,6 +6,7 @@ const roles = require("../data/roles")
 const jwtGenerator = require("../utils/jwtGenerator")
 const getSlug = require("../utils/geSlug")
 const { MAIN_LIMIT } = require("../data/constants")
+
 const login = async (req, res) => {
     const { email, password } = req.body
     // Check Empty Feilds

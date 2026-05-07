@@ -3,15 +3,26 @@ const statusText = require("../data/statusText")
 const { MAIN_LIMIT } = require("../data/constants")
 const { ACCEPTED, DECLINED } = require("../data/appointmentStatus")
 const { formatDate } = require("../utils/index")
-const { removeCancelled } = require("../utils/appointments")
+const { removeCancelled, checkIfTwoPendingAppointments } = require("../utils/appointments")
 const { json } = require("zod")
 const dayjs = require('dayjs');
 
 const createAppointment = async (req, res) => {
-    const { clinicId, ...data } = req.body;
-
+    const data = req.body;
     try {
-        if (!clinicId) return res.تson({ status: statusText.ERROR, data: "يجب اختيار عيادة" })
+        if (!data.clinicId) return res.json({ status: statusText.ERROR, data: "يجب اختيار عيادة" })
+
+        // Check if the phone number exists and dont have a pending appointment
+        const phoneNumber = data.patientPhoneNumber
+        if (!phoneNumber) return res.json({ status: statusText.ERROR, data: "يجب ادخال رقم الهاتف" })
+        const appointmentsWithPhoneNumbers = await Appointment.find({
+            clinicId: data.clinicId,
+            patientPhoneNumber: phoneNumber
+        })
+
+        if (checkIfTwoPendingAppointments(appointmentsWithPhoneNumbers))
+            return res.json({ status: statusText.ERROR, data: "لا يمكن حجز اكثر من موعدين" })
+
         if (!data.date) {
             return res.status(400).json({ status: statusText.ERROR, message: "التاريخ مطلوب" });
         }
@@ -21,7 +32,7 @@ const createAppointment = async (req, res) => {
         }
 
         const existingAppointment = await Appointment.findOne({
-            clinicId,
+            clinicId: data.clinicId,
             date: data.date
         });
 
@@ -33,8 +44,7 @@ const createAppointment = async (req, res) => {
         }
 
         const newAppointment = new Appointment({
-            clinicId,
-            ...data,
+            ...data
         });
 
         await newAppointment.save();

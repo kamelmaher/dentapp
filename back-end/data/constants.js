@@ -1,4 +1,7 @@
 const MAIN_LIMIT = 6
+const MAX_APPOINTMENTS_FOR_PATIENT = 1
 module.exports = {
-    MAIN_LIMIT
+    MAIN_LIMIT,
+    MAX_APPOINTMENTS_FOR_PATIENT
 }
+
