@@ -5,7 +5,7 @@ const limiter = (hours = 12, max = 1) => {
         windowMs: hours * 60 * 60 * 1000,
         max: max,
         handler: (req, res) => {
-            return res.status(429).json({
+            return res.json({
                 status: ERROR,
                 data: "محاولات كثيرة، حاول لاحقًا"
             });
