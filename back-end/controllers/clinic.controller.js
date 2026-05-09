@@ -8,7 +8,18 @@ const dayjs = require("dayjs")
 const getClinics = async (req, res) => {
     const page = req.query.page || 1
     const skip = (page - 1) * MAIN_LIMIT
-    const clinics = await Clinic.find().limit(MAIN_LIMIT).skip(skip)
+    const clinics = await Clinic.find({
+        plan: {
+            $in: [
+                plans.ANNUAL,
+                plans.MONTHLY,
+                plans.LIFETIME
+            ]
+        },
+        validTo: {
+            $gt: dayjs()
+        }
+    }).limit(MAIN_LIMIT).skip(skip)
     const total = await Clinic.countDocuments()
     res.json({ status: statusText.SUCCESS, data: clinics, pages: Math.ceil(total / MAIN_LIMIT) })
 }

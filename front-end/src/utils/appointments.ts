@@ -1,3 +1,4 @@
+import { APPOINTMENT_DURATION } from "../data/constants";
 import type { WorkingHours } from "../types/Clinic";
 
 import dayjs from 'dayjs';
@@ -12,17 +13,16 @@ export const checkExpired = (date: string) => dayjs(date).isBefore(dayjs());
 
 export const getAvailableHours = (workingHours: WorkingHours[], date: string) => {
     const selectedDate = new Date(date);
-    const today = new Date();
+    const today = dayjs()
 
     const isToday =
-        selectedDate.getFullYear() === today.getFullYear() &&
-        selectedDate.getMonth() === today.getMonth() &&
-        selectedDate.getDate() === today.getDate();
+        selectedDate.getFullYear() === today.year() &&
+        selectedDate.getMonth() === today.month() &&
+        selectedDate.getDate() === today.date();
 
-    const day = selectedDate.getDay();
+    const day = (dayjs(date).day() + 1) % 7;
 
     const workingDay = workingHours.find((d) => d.day === day);
-
     if (!workingDay || !workingDay.isOpen) {
         return [];
     }
@@ -33,7 +33,7 @@ export const getAvailableHours = (workingHours: WorkingHours[], date: string) =>
     let effectiveStart = startHour;
 
     if (isToday) {
-        const currentHour = today.getHours();
+        const currentHour = today.hour();
         effectiveStart = Math.max(startHour, currentHour + 1);
     }
 
@@ -41,10 +41,16 @@ export const getAvailableHours = (workingHours: WorkingHours[], date: string) =>
 }
 
 const generateSlots = (startHour: number, endHour: number) => {
-    const arr: number[] = [];
+    const arr: string[] = [];
 
-    for (let i = startHour; i < endHour; i++) {
-        arr.push(i);
+    for (let i = startHour; i < endHour; i += APPOINTMENT_DURATION) {
+        const hours = Math.floor(i);
+        const minutes = (i % 1) * 60;
+        const hour = dayjs()
+            .hour(hours)
+            .minute(minutes)
+            .format("HH:mm");
+        arr.push(hour);
     }
 
     return arr;
@@ -56,3 +62,9 @@ export const getMinDate = () => {
     d.setHours(0, 0, 0, 0);
     return d.toISOString().split("T")[0];;
 };
+
+export const isWorkingDay = (workingHours: WorkingHours[], date: string) => {
+    const day = (dayjs(date).day() + 1) % 7;
+    const workingDay = workingHours.find((d) => d.day === day);
+    return workingDay && workingDay.isOpen
+}

@@ -228,7 +228,7 @@ const getBooked = async (req, res) => {
         });
 
         const bookedHours = appointments.map((a) => {
-            return dayjs(a.date).hour();
+            return dayjs(a.date).format("hh:mm");
         });
 
         return res.json({

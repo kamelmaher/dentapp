@@ -24,7 +24,7 @@ type appointmentState = {
     confirmAppointment: (id: string) => Promise<void>
     declineAppointment: (id: string) => Promise<void>
     search: (term: string) => Promise<void>
-    getBooked: (date: string) => Promise<number[]>,
+    getBooked: (date: string) => Promise<string[]>,
 }
 export const useAppointmentStore = create<appointmentState>((set, get) => ({
     loading: false,

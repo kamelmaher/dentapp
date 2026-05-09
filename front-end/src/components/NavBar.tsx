@@ -31,7 +31,7 @@ const NavBar = () => {
 
                 {/* Logo */}
                 <div className='w-12 flex gap-1 items-center'>
-                    <img src="logo.png" alt="logo" className='cover w-full' />
+                    <img src="/logo.png" alt="logo" className='cover w-full' />
                     <NavLink to="/" className="text-2xl font-bold text-blue-600" onClick={() => setIsOpen(false)}>
                         SmileDesk
                     </NavLink>

@@ -12,7 +12,7 @@ const checkSubscription = require("../middleware/checkSubscription")
 const limiter = require("../middleware/limiter")
 
 
-router.post("/", limiter(24), validate(appointmentSchema), createAppointment)
+router.post("/", validate(appointmentSchema), createAppointment)
 
 router.use(verifyToken)
 router.use(checkSubscription)

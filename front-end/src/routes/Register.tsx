@@ -18,7 +18,7 @@ const RegisterPage: React.FC = () => {
     const handleSubmit = async (e: React.FormEvent) => {
         e.preventDefault();
         const res = await register(formData)
-        if (res.success) navigate("/")
+        if (res.success) navigate("/pricing")
     };
 
     useEffect(() => {

@@ -3,7 +3,8 @@ import { useEffect, useState } from "react";
 import { useAppointmentStore } from "../store/appointment.store";
 import type { WorkingHours } from "../types/Clinic";
 import Spinner from "./Spinner";
-import { getAvailableHours, getMinDate } from "../utils/appointments";
+import { getAvailableHours, getMinDate, isWorkingDay } from "../utils/appointments";
+import dayjs from "dayjs";
 
 type Props = {
     workingHours: WorkingHours[];
@@ -12,23 +13,18 @@ type Props = {
 
 export default function TimeSelector({ workingHours, onSelect }: Props) {
     const [date, setDate] = useState("");
-    const [slots, setSlots] = useState<number[]>([]);
-    const [selected, setSelected] = useState<number | null>(null);
-    const [booked, setBooked] = useState<number[]>([])
+    const [slots, setSlots] = useState<string[]>([]);
+    const [selected, setSelected] = useState<string | null>(null);
+    const [booked, setBooked] = useState<string[]>([])
     const [bookedLoading, setBookedLoading] = useState(false)
     const { getBooked } = useAppointmentStore()
-
+    // Booked Appointments
     useEffect(() => {
         if (!date) return;
 
-        const selectedDate = new Date(date);
-        const day = selectedDate.getDay();
-
-        const workingDay = workingHours.find((d) => d.day === day);
-
-        if (!workingDay || !workingDay.isOpen) {
-            setBooked([]);
-            return;
+        if (!isWorkingDay(workingHours, date)) {
+            setBooked([])
+            return
         }
 
         const fetchBooked = async () => {
@@ -37,7 +33,6 @@ export default function TimeSelector({ workingHours, onSelect }: Props) {
             const isoDate = new Date(date).toISOString().split("T")[0];
 
             const bookedData = await getBooked(isoDate);
-
             setBooked(bookedData);
             setBookedLoading(false);
         };
@@ -45,6 +40,7 @@ export default function TimeSelector({ workingHours, onSelect }: Props) {
         fetchBooked();
     }, [date, getBooked, workingHours]);
 
+    // Generate Slots
     useEffect(() => {
         if (!date) return;
         setSlots(getAvailableHours(workingHours, date))
@@ -54,8 +50,13 @@ export default function TimeSelector({ workingHours, onSelect }: Props) {
     useEffect(() => {
         if (!date || selected === null) return;
 
-        const selectedDate = new Date(date);
-        selectedDate.setHours(selected, 0, 0, 0);
+        const [hours, minutes] = selected.split(":").map(Number);
+
+        const selectedDate = dayjs(date)
+            .hour(hours)
+            .minute(minutes)
+            .second(0)
+            .millisecond(0);
 
         onSelect(selectedDate.toISOString());
     }, [date, onSelect, selected]);
@@ -74,35 +75,56 @@ export default function TimeSelector({ workingHours, onSelect }: Props) {
             </div>
 
             {/* ⏰ TIME */}
-            {bookedLoading ? <Spinner /> :
+            {bookedLoading ? (
+                <Spinner />
+            ) : (
                 slots.length > 0 && (
-                    <div>
-                        <p>اختر الوقت</p>
-                        <div className="grid grid-cols-4 gap-2">
-                            {slots.map((h) => {
-                                const isBooked = booked.includes(h);
+                    <div className="space-y-2">
+                        <label className="block text-sm font-semibold text-gray-700">
+                            اختر الوقت المناسب
+                        </label>
 
-                                return (
-                                    <button
-                                        type="button"
-                                        key={h}
-                                        disabled={isBooked}
-                                        onClick={() => setSelected(h)}
-                                        className={`p-2 rounded border
-                  ${isBooked
-                                                ? "bg-gray-200 cursor-not-allowed"
-                                                : selected === h
-                                                    ? "bg-blue-600 text-white"
-                                                    : "hover:bg-blue-50"
-                                            }`}
-                                    >
-                                        {h >= 12 ? `${h - 12 || 12} PM` : `${h} AM`}
-                                    </button>
-                                );
-                            })}
+                        <div className="relative">
+                            <select
+                                value={selected || ""}
+                                onChange={(e) => setSelected(e.target.value)}
+                                className="
+                        w-full appearance-none rounded-xl border border-gray-300 bg-white px-4 py-3 text-sm shadow-sm outline-none transition focus:border-blue-500 focus:ring-2 focus:ring-blue-200"
+                            >
+                                <option value="">
+                                    اختر موعدًا متاحًا
+                                </option>
+
+                                {slots.map((h) => {
+                                    const isBooked = booked.includes(h);
+
+                                    return (
+                                        <option
+                                            key={h}
+                                            value={h}
+                                            disabled={isBooked}
+                                        >
+                                            {isBooked
+                                                ? `${h} - محجوز`
+                                                : h}
+                                        </option>
+                                    );
+                                })}
+                            </select>
+
+                            <div className="pointer-events-none absolute inset-y-0 left-3 flex items-center text-gray-400">
+                                ▼
+                            </div>
                         </div>
+
+                        {selected && (
+                            <p className="text-sm text-blue-600">
+                                الموعد المختار: {selected} بتاريخ {date}
+                            </p>
+                        )}
                     </div>
-                )}
+                )
+            )}
 
             {/* ❌ لا يوجد مواعيد */}
             {date && slots.length === 0 && (
