@@ -13,7 +13,7 @@ const checkSmsSubscriped = require("../middleware/checkSmsSubscriped")
 const limiter = require("../middleware/limiter")
 
 
-router.post("/", validate(appointmentSchema), checkSmsSubscriped, createAppointment)
+router.post("/", validate(appointmentSchema), createAppointment)
 router.post("/check-number", checkPhoneNumber)
 router.use(verifyToken)
 router.use(checkSubscription)

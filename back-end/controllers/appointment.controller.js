@@ -149,7 +149,7 @@ const confirmAppointment = async (req, res) => {
     const { id } = req.params;
     if (!id) return res.json({ status: statusText.FAIL, data: "Id is required" })
     try {
-        const appointment = await Appointment.findByIdAndUpdate(id, { status: ACCEPTED }, { new: true })
+        const appointment = await Appointment.findByIdAndUpdate(id, { status: ACCEPTED }, { returnDocument: "after" })
         if (appointment) {
             return res.json({ status: statusText.SUCCESS, data: appointment })
         }
@@ -163,7 +163,7 @@ const declineAppointment = async (req, res) => {
     const { id } = req.params;
     if (!id) return res.json({ status: statusText.FAIL, data: "Id is required" })
     try {
-        const appointment = await Appointment.findByIdAndUpdate(id, { status: ACCEPTED }, { new: true })
+        const appointment = await Appointment.findByIdAndUpdate(id, { status: DECLINED }, { returnDocument: "after" })
         if (appointment) {
             return res.json({ status: statusText.SUCCESS, data: appointment })
         }

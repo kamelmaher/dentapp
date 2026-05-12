@@ -51,7 +51,7 @@ export const useAppointmentStore = create<appointmentState>((set, get) => ({
                 sms.pickAppointment({ clinicId: data.clinicId, date: data.date, patientName: data.patientName })
             }
             else {
-                set({ err: "error while creating appointment" })
+                set({ err: "فشل انشاء الموعد" })
                 showError(response.data.data)
             }
         } catch (err) {

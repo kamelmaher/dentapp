@@ -24,7 +24,7 @@ export const plansData = [
     {
         value: plans.MONTHLY,
         text: "شهري",
-        price: "₪80",
+        price: "₪100",
         duration: "/شهر",
         description: "مثالية للبدء وتجربة جميع ميزات SmileDesk",
         highlight: false,
