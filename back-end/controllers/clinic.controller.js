@@ -5,7 +5,7 @@ const plans = require("../data/plans");
 const getSlug = require("../utils/geSlug")
 const dayjs = require("dayjs")
 
-const getClinics = async (req, res) => {
+const getSubscribedClinics = async (req, res) => {
     const page = req.query.page || 1
     const skip = (page - 1) * MAIN_LIMIT
     const clinics = await Clinic.find({
@@ -70,6 +70,11 @@ const getClinicDetails = async (req, res) => {
     res.json({ status: statusText.FAIL, data: "Clinic Not Found" })
 }
 
+const getAllClinics = async (req, res) => {
+    const clinics = await Clinic.find();
+    return res.json({ status: statusText.SUCCESS, data: clinics })
+}
+
 const subscribe = async (req, res) => {
     const { clinicId } = req.body;
     if (!clinicId) return res.json({ status: statusText.ERROR, data: "User Not Found" })
@@ -120,7 +125,8 @@ const subscribe = async (req, res) => {
 
 module.exports = {
     getClinicBySlug,
-    getClinics,
+    getSubscribedClinics,
+    getAllClinics,
     updateClinic,
     getClinicDetails,
     subscribe

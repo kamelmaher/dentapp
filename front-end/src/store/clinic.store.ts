@@ -18,6 +18,7 @@ type clinicState = {
     getUserClinic: () => Promise<void>
     updateClinic: (data: Partial<Clinic>) => Promise<void>
     subscribe: (clinicId: string, plan: string) => Promise<void>
+    getAllClinics: () => Promise<Clinic[]>
 }
 export const useClinicStore = create<clinicState>((set, get) => ({
     loading: false,
@@ -109,6 +110,19 @@ export const useClinicStore = create<clinicState>((set, get) => ({
             }
         } catch (err) {
             showError()
+        }
+    },
+    
+    getAllClinics: async () => {
+        set({ loading: true })
+        try {
+            const res = await clinic.getAllClinics()
+            if (res.data.status === "success") return res.data.data
+            else return []
+        } catch (err) {
+            return []
+        } finally {
+            set({ loading: false })
         }
     }
 }))

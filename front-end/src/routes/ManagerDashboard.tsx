@@ -1,17 +1,24 @@
-import { useEffect } from "react";
+import { useEffect, useState } from "react";
 import { useClinicStore } from "../store/clinic.store";
 import { useUserStore } from "../store/user.store";
 import Spinner from "../components/Spinner";
 import { plans } from "../data/constants";
+import type { Clinic } from "../types/Clinic";
 // import Pagination from "../components/Paginiation";
 
 const ManagerDashboard = () => {
     const { loading, users, getUsers } = useUserStore()
-    const { clinics, loading: clinicsLoading, loadClinics, subscribe } = useClinicStore()
+    const { loading: clinicsLoading, subscribe, getAllClinics } = useClinicStore()
+    const [clinics, setClinics] = useState<Clinic[]>([])
     useEffect(() => {
         getUsers()
-        loadClinics()
-    }, [getUsers, loadClinics])
+        const fetchClinics = async () => {
+            const data = await getAllClinics()
+            setClinics(data)
+        }
+        fetchClinics()
+    }, [getUsers, getAllClinics])
+
     const handleChange = async (clinicId: string, plan: string) => {
         await subscribe(clinicId, plan)
     }
