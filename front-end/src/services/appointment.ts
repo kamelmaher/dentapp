@@ -5,7 +5,8 @@ const baseUrl = "/appointment"
 export const appointment = {
     create: (data: Appointment) => post(baseUrl, data),
     // getById: (id: string) => get(`/appointment/${id}`),
-    loadAppointments: async (page: number) => get(`${baseUrl}?page=${page}`),
+    loadAppointments: async ({ page , dateRange, status }: { page?: number, dateRange?: string, status?: string }) => get(`${baseUrl}?page=${page}&date=${dateRange}&status=${status}`),
+
     getTodayAppointments: () => get(`${baseUrl}/today`),
     getUpComingAppointments: () => get(`${baseUrl}/upcoming`),
     getExpiredAppointments: (page: number) => get(`${baseUrl}/expired?page=${page || 1}`),

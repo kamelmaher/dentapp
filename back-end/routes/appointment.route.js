@@ -1,7 +1,7 @@
 const router = require("express").Router()
 
 // controllers
-const { createAppointment, loadAppointments, getTodayAppointments, getUpcomingAppointments, getExpiredAppointments, confirmAppointment, declineAppointment, searchAppointments, getBooked, checkPhoneNumber } = require("../controllers/appointment.controller")
+const { createAppointment, loadAppointments, confirmAppointment, declineAppointment, getBooked, checkPhoneNumber } = require("../controllers/appointment.controller")
 
 const { appointmentSchema } = require("../validations/appointment.validation")
 
@@ -20,10 +20,6 @@ router.use(checkSubscription)
 
 
 router.get("/", loadAppointments)
-router.get("/today", getTodayAppointments)
-router.get("/upcoming", getUpcomingAppointments)
-router.get("/expired", getExpiredAppointments)
-router.get("/search", searchAppointments)
 router.get("/booked", getBooked)
 
 router.patch("/confirm/:id", confirmAppointment)

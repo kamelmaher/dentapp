@@ -3,22 +3,10 @@ import { Outlet } from "react-router";
 import Spinner from "../components/Spinner";
 import { useClinicStore } from "../store/clinic.store";
 import DashboardLinks from "../components/Dashboard/DashboardLinks";
-import { useAppointmentStore } from "../store/appointment.store";
 import { useStatics } from "../store/statics.store";
 
 export default function Dashboard() {
     const { getUserClinic, selectedClinic, loading } = useClinicStore()
-    const { getTodayAppointments } = useAppointmentStore()
-
-    useEffect(() => {
-        const loadData = async () => {
-            await Promise.all([
-                getUserClinic(),
-                getTodayAppointments(),
-            ])
-        }
-        loadData()
-    }, [getTodayAppointments, getUserClinic])
     const { getStatics } = useStatics()
 
     useEffect(() => {

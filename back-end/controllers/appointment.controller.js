@@ -1,8 +1,8 @@
 const Appointment = require("../models/Appointment")
 const statusText = require("../data/statusText")
 const { MAIN_LIMIT } = require("../data/constants")
-const { ACCEPTED, DECLINED } = require("../data/appointmentStatus")
-const { removeCancelled, checkIfTwoPendingAppointments } = require("../utils/appointments")
+const { ACCEPTED, DECLINED, PENDING } = require("../data/appointmentStatus")
+const { removeCancelled, checkIfTwoPendingAppointments, getTodayDate, getUpcomingDate, getExpiredDate } = require("../utils/appointments")
 const dayjs = require('dayjs');
 
 const createAppointment = async (req, res) => {
@@ -52,98 +52,40 @@ const createAppointment = async (req, res) => {
 
 const loadAppointments = async (req, res) => {
     const user = req.user;
-    const page = req.query.page
-
+    const { date, page, status } = req.query
     const skip = MAIN_LIMIT * (+page - 1)
     if (!user) return res.json({ status: statusText.ERROR, data: "UnAuthorized" })
-    const appointments = await Appointment.find({ clinicId: user.clinicId }).limit(MAIN_LIMIT).skip(skip)
-    if (appointments.length == 0) return res.json({ status: statusText.FAIL, data: "No Appointments for this Clinic" })
-
-    const total = await Appointment.countDocuments({ clinicId: user.clinicId });
-    res.json({
-        status: statusText.SUCCESS,
-        data: appointments,
-        pages: Math.ceil(total / MAIN_LIMIT)
-    });
-
-}
-
-const getTodayAppointments = async (req, res) => {
-    const user = req.user
-    if (!user) return res.json({ status: statusText.ERROR, data: "UnAuthorized" })
     try {
-        const startOfDay = dayjs().startOf('day').toDate();
-
-        const startOfNextDay = dayjs().add(1, 'day').startOf('day').toDate();
-
-        const appointments = await Appointment.find({
-            clinicId: user.clinicId,
-            date: {
-                $gte: startOfDay,
-                $lt: startOfNextDay
-            }
-        });
-
-        res.json({ status: statusText.SUCCESS, data: appointments });
-    } catch (error) {
-        res.status(500).json({ message: "خطأ في جلب المواعيد", error });
-    }
-};
-
-const getUpcomingAppointments = async (req, res) => {
-    const user = req.user;
-    if (!user) return res.json({ status: statusText.ERROR, data: "UnAuthorized" })
-    try {
-        const startOfTomorrow = dayjs().add(1, 'day').startOf('day').toDate();
-
-        const endOfRange = dayjs().add(11, 'day').startOf('day').toDate();
-
-        const appointments = await Appointment.find({
-            clinicId: user.clinicId,
-            date: {
-                $gte: startOfTomorrow,
-                $lt: endOfRange
-            }
-        }).sort({ date: 1 });
-
-        return res.json({
+        let filters = { clinicId: user.clinicId }
+        switch (date) {
+            case "today":
+                filters.date = getTodayDate()
+                break;
+            case "upcoming":
+                filters.date = getUpcomingDate()
+                break;
+            case "expired":
+                filters.date = getExpiredDate()
+                break;
+        }
+        if ([PENDING, ACCEPTED, DECLINED].includes(status)) {
+            filters.status = status;
+        }
+        const appointments = await Appointment.find(filters).sort({ date: -1 }).limit(MAIN_LIMIT).skip(skip)
+        const total = appointments && await Appointment.countDocuments(filters)
+        res.json({
             status: statusText.SUCCESS,
             data: appointments,
+            pages: Math.ceil(total / MAIN_LIMIT)
         });
-
     } catch (err) {
+        console.log(err)
         return res.json({
             status: statusText.ERROR,
-            data: "Internal Server Error",
+            msg: "Internal Server Error",
         });
     }
-};
-
-const getExpiredAppointments = async (req, res) => {
-    const { clinicId } = req.user;
-    try {
-
-        const now = dayjs().toDate();
-
-        const expiredAppointments = await Appointment.find({
-            clinicId,
-            date: { $lt: now }
-        }).sort({ date: -1 });
-
-        return res.json({
-            status: statusText.SUCCESS,
-            data: expiredAppointments
-        });
-
-    } catch (error) {
-        console.error("Get Expired Appointments Error:", error);
-
-        res.status(500).json({
-            status: statusText.FAIL,
-            data: "Something went wrong"
-        });
-    }
-};
+}
 
 const confirmAppointment = async (req, res) => {
     const { id } = req.params;
@@ -170,29 +112,6 @@ const declineAppointment = async (req, res) => {
         return res.json({ status: statusText.FAIL, data: "Failed Decline Appointment" })
     } catch (err) {
         return res.json({ status: statusText.ERROR, data: "Internal Server Error" })
-    }
-}
-
-const searchAppointments = async (req, res) => {
-    const { term } = req.query
-    const { clinicId } = req.user
-    if (!term || term.trim() === "") {
-        return res.status(200).json({
-            status: "success",
-            data: []
-        })
-    }
-    try {
-        const results = await Appointment.find({
-            clinicId: clinicId,
-            patientName: {
-                $regex: term,
-                $options: "i"
-            }
-        }).sort({ date: -1 })
-        res.json({ status: statusText.SUCCESS, data: results })
-    } catch (err) {
-        res.json({ status: statusText.ERROR, data: "Something went wrong" })
     }
 }
 
@@ -259,12 +178,8 @@ const checkPhoneNumber = async (req, res) => {
 module.exports = {
     createAppointment,
     loadAppointments,
-    getTodayAppointments,
-    getUpcomingAppointments,
-    getExpiredAppointments,
     confirmAppointment,
     declineAppointment,
-    searchAppointments,
     getBooked,
     checkPhoneNumber
 }

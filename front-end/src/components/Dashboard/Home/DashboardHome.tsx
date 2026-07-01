@@ -6,12 +6,12 @@ import { useStatics } from "../../../store/statics.store"
 import Spinner from "../../Spinner"
 
 export default function DashboardHome() {
-    const { todayAppointments, loading, getTodayAppointments } = useAppointmentStore()
+    const { todayAppointments, loading, loadAppointments } = useAppointmentStore()
     const { statics, loading: staticsLoading } = useStatics()
     const { user } = useAuthStore()
     useEffect(() => {
-        getTodayAppointments()
-    }, [getTodayAppointments])
+        loadAppointments({ page: 1, dateRange: "today" })
+    }, [loadAppointments])
     return <>
         {/* Header */}
         <div>
