@@ -21,7 +21,6 @@ export const useStatics = create<staticsState>((set) => ({
         set({ loading: true })
         try {
             const res = await statics.dashboardStatics(id)
-            console.log(res.data.data)
             if (res.status === 200)
                 set({ statics: res.data.data })
         } catch (err: any) {

@@ -1,10 +1,16 @@
+import { useEffect, useState } from "react"
 import { AppointmentFilter } from "../../../data/AppointmentsFilter"
+import { useAppointmentStore } from "../../../store/appointment.store"
+const AppointmentsFilter = () => {
+    const { loadAppointments } = useAppointmentStore()
+    const [filters, setFilters] = useState({
+        dateRange: "",
+        status: ""
+    })
 
-type AppointmentsFilterProps = {
-    handleChangeType: (type: string) => void,
-    handleSearch: (term: string) => void
-}
-const AppointmentsFilter = ({ handleChangeType, handleSearch }: AppointmentsFilterProps) => {
+    useEffect(() => {
+        loadAppointments({ dateRange: filters.dateRange, status: filters.status })
+    }, [loadAppointments, filters])
     return (
         <div className="flex flex-col sm:flex-row sm:items-center gap-3 sm:gap-4">
 
@@ -13,7 +19,7 @@ const AppointmentsFilter = ({ handleChangeType, handleSearch }: AppointmentsFilt
                 <select
                     className="w-full appearance-none px-4 py-3 pr-10 bg-white border border-gray-200 rounded-xl shadow-sm hover:shadow-md transition outline-none cursor-pointer"
                     defaultValue=""
-                    onChange={(e) => handleChangeType(e.target.value)}
+                    onChange={e => setFilters({ ...filters, dateRange: e.target.value })}
                 >
                     {
                         Object.values(AppointmentFilter).map(item => <option key={item.text} value={item.value}>
@@ -27,22 +33,24 @@ const AppointmentsFilter = ({ handleChangeType, handleSearch }: AppointmentsFilt
                     ▼
                 </div>
             </div>
+            <div className="relative w-full sm:w-64">
+                <select
+                    className="w-full appearance-none px-4 py-3 pr-10 bg-white border border-gray-200 rounded-xl shadow-sm hover:shadow-md transition outline-none cursor-pointer"
+                    defaultValue=""
+                    onChange={e => setFilters({ ...filters, status: e.target.value })}
+                >
+                    <option value="">جميع الحالات</option>
+                    <option value="pending">قيد الانتظار</option>
+                    <option value="accepted">مقبول</option>
+                    <option value="declined">مرفوض</option>
+                </select>
 
-            {/* Search */}
-            <div className="relative w-full sm:flex-1">
-                <input
-                    placeholder="بحث عن مريض..."
-                    className="w-full pl-4 pr-10 py-3 bg-white border border-gray-200 rounded-xl shadow-sm hover:shadow-md focus:ring-2 focus:ring-blue-500/20 transition outline-none"
-                    onChange={e => handleSearch(e.target.value)}
-                />
-
-                {/* Search icon */}
-                <div className="absolute right-3 top-1/2 -translate-y-1/2 text-gray-400">
-                    🔍
+                {/* Arrow icon */}
+                <div className="absolute right-3 top-1/2 -translate-y-1/2 pointer-events-none text-gray-400">
+                    ▼
                 </div>
             </div>
-
-        </div>
+        </div >
     )
 }
 

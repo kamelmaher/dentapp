@@ -1,3 +1,4 @@
+/* eslint-disable @typescript-eslint/no-explicit-any */
 /* eslint-disable @typescript-eslint/no-unused-vars */
 import { create } from "zustand";
 import { appointment } from "../services/appointment";
@@ -13,18 +14,13 @@ type appointmentState = {
     todayAppointments: Appointment[],
     upComingAppointments: Appointment[],
     expiredAppointments: Appointment[],
-    searchResults: Appointment[],
     page: number,
     totalPages: number,
     setPage: (page: number) => void,
     createAppointment: (data: Appointment) => Promise<void>
-    loadAppointments: (page: number) => Promise<void>,
-    getTodayAppointments: () => Promise<void>
-    getUpcomingAppointments: () => Promise<void>
-    getExpiredAppointments: (page: number) => Promise<void>
+    loadAppointments: ({ dateRange, page, status }: { page?: number, dateRange?: string, status?: string }) => Promise<void>,
     confirmAppointment: (id: string) => Promise<void>
     declineAppointment: (id: string) => Promise<void>
-    search: (term: string) => Promise<void>
     getBooked: (date: string) => Promise<string[]>,
 }
 
@@ -40,7 +36,6 @@ export const useAppointmentStore = create<appointmentState>((set, get) => ({
     page: 1,
     totalPages: 0,
     setPage: (page) => set({ page }),
-
     createAppointment: async (data) => {
         set({ loading: true, err: null })
         try {
@@ -61,59 +56,18 @@ export const useAppointmentStore = create<appointmentState>((set, get) => ({
             set({ loading: false })
         }
     },
-
-    loadAppointments: async (page) => {
+    loadAppointments: async ({ dateRange, page, status }) => {
         try {
             set({ loading: true })
-            const res = await appointment.loadAppointments(page)
+            const res = await appointment.loadAppointments({ dateRange, page, status })
             if (res.data.status == "success")
                 set({ appointments: res.data.data, totalPages: res.data.pages })
-            else set({ err: res.data.data })
-        } catch (err) {
-            set({ err: "Something went Wrong" })
+        } catch (err: any) {
+            set({ err: err.response.data.data })
         } finally {
             set({ loading: false })
         }
     },
-
-    getTodayAppointments: async () => {
-        try {
-            const res = await appointment.getTodayAppointments()
-            if (res.data.status === "success")
-                set({ todayAppointments: res.data.data })
-            else set({ err: res.data.data })
-        } catch (err) {
-            showError("حدث خطا في تحميل مواعيد اليوم")
-        }
-    },
-
-    getUpcomingAppointments: async () => {
-        set({ loading: true })
-        try {
-            const res = await appointment.getUpComingAppointments()
-            if (res.data.status === "success")
-                set({ upComingAppointments: res.data.data })
-            else set({ err: res.data.data })
-        } catch (err) {
-            showError("حدث خطا في تحميل المواعيد القادمة")
-        } finally {
-            set({ loading: false })
-        }
-    },
-
-    getExpiredAppointments: async (page) => {
-        try {
-            set({ loading: true })
-            const res = await appointment.getExpiredAppointments(page)
-            if (res.data.status == "success")
-                set({ expiredAppointments: res.data.data })
-        } catch (err) {
-            showError("حدث خطا في تحميل المواعيد المنتهية")
-        } finally {
-            set({ loading: false })
-        }
-    },
-
     confirmAppointment: async (id) => {
         if (!id) return
         set({ optionsLoading: true })
@@ -143,7 +97,6 @@ export const useAppointmentStore = create<appointmentState>((set, get) => ({
             set({ optionsLoading: false })
         }
     },
-
     declineAppointment: async (id) => {
         if (!id) return
         set({ optionsLoading: true })
@@ -169,19 +122,6 @@ export const useAppointmentStore = create<appointmentState>((set, get) => ({
             set({ optionsLoading: false })
         }
     },
-
-    search: async (term) => {
-        set({ loading: true })
-        try {
-            const res = await appointment.search(term)
-            if (res.data.status === "success") set({ searchResults: res.data.data })
-        } catch (err) {
-            set({ err: "Something went wrong" })
-        } finally {
-            set({ loading: false })
-        }
-    },
-
     getBooked: async (date: string) => {
         const res = await appointment.getBooked(date)
         if (res.data.status === "success")
